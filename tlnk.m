@@ -77,7 +77,7 @@ while (any(flg)) %while(dmin<1)    %while(k<=n-1)        %while(~all(Dtemp==1))
     
 end
 
-dendrogram(T, 0)
+%dendrogram(T, 0)
 G = cluster(T, 'cutoff', 1-(1/(size(P,1)))+eps, 'criterion', 'distance');
 
 

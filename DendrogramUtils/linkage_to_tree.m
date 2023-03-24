@@ -1,7 +1,7 @@
 % Function to convert a linkage matrix to a tree representation
 
 % Inputs:
-%   - linkage_matrix: matrix obtained from hierarchical clustering
+%   - linkage_matrix: linkage matrix obtained from J-Linkage (or T-Linkage)
 
 % Output:
 %   - tree: tree representation of the hierarchical clustering.

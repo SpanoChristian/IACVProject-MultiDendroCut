@@ -1,4 +1,4 @@
-% Function to get the points belonging to a cluster
+% Function to get the points INDICES belonging to a cluster
 
 % Inputs:
 %   - C: index of the cluster to get points for

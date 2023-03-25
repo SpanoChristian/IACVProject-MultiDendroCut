@@ -1,4 +1,4 @@
-function [ok, msScore, msOutput] = isMergeableGricLine(X, L, i, j, lambda1 , lambda2,sigma)
+function [ok, msScore, msOutput] = isMergeableGricLine(X, XL, XR, lambda1, lambda2, sigma)
 % Check if two clusters A and B can be merged.
 % The test performs the following steps:
 % i) a model i on the first cluster is computed
@@ -30,20 +30,33 @@ r = 2; % dimenson of the ambient space
 %%------------------------------------------------------------
 
 %% precomputations
-isInCi = L==L(i);
-isInCj = L==L(j);
+
 % consider points in cluster Ci, in cluster Cj and in the union Ci U Cj
-Xi = X(:,isInCi);
-Xj = X(:,isInCj);
-Xij = X(:,isInCi | isInCj);
+Xi = XL;
+Xj = XR;
+Xij = X;
 % fit a model on Ci, Cj and Ci U Cj
-mi = fit_line(Xi);
-mj = fit_line(Xj);
-mij = fit_line(Xij);
-% compute the residuals
-ri = res_line(Xi, mi);
-rj = res_line(Xj, mj);
-rij = res_line(Xij, mij);
+if size(Xi, 2) >= 2
+    mi = fitline(Xi);
+    ri = res_line(Xi, mi);
+else
+    ri = 100;
+end
+
+if size(Xj, 2) >= 2
+    mj = fitline(Xj);
+    rj = res_line(Xj, mj);
+else
+    rj = 100;
+end
+
+if size(Xij, 2) >= 2
+    mij = fitline(Xij);
+    rij = res_line(Xij, mij);
+else
+    rij = 100;
+end
+
 % compute squared residual
 rSqri = ri.^2;
 rSqrj = rj.^2;
@@ -78,12 +91,10 @@ msScore.complexity.after = mcAfter;
 msOutput.Xi = Xi;
 msOutput.Xj = Xj;
 msOutput.Xij = Xij;
-msOutput.mi = mi;
-msOutput.mj = mj;
-msOutput.mij = mij;
+%msOutput.mi = mi;
+%msOutput.mj = mj;
+%msOutput.mij = mij;
 msOutput.ri = ri;
 msOutput.rj = rj;
 msOutput.rij = rij;
-msOutput.isInCi = isInCi;
-msOutput.isInCj = isInCj;
 end

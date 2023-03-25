@@ -40,17 +40,17 @@ function [OK, gScoreBefore, gScoreAfter, V, AgtB] = explore(C, X, tree)
         plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
         if size(XL, 2) >= 2
             cXL = fitline(XL);
+            
         end
+        drawLines(cXL)
+        drawnow
         hold on
         plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
         if size(XR, 2) >= 2
             cXR = fitline(XR);
+            drawLines(cXR)
         end
-        
-        drawLines(cXL)
-        drawnow;
-        drawLines(cXR)
-        drawnow;
+        drawnow
         
         V = [V currNode];
         S(1) = [];
@@ -69,8 +69,8 @@ function [OK, gScoreBefore, gScoreAfter, V, AgtB] = explore(C, X, tree)
         disp(["Visited Node : " currNode])
         disp(["Stack : " S])
         
-        %hold off
-        pause(1)
+        hold off
+        pause(3)
     
     end
     

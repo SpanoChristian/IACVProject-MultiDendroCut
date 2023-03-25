@@ -6,7 +6,7 @@ function [gScore, dataFidelity, modelComplexity] = getGricScore(rSqr,sigma,r,d,k
 
 n = numel(rSqr);
 dataFidelity = sum(min(rSqr./sigma^2, 2*(r-d)));
-modelComplexity =  lambda1*n*d + lambda2*k;
+modelComplexity = log(n)*d;
 gScore = dataFidelity + modelComplexity;
 
 

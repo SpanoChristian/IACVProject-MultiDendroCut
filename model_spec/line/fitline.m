@@ -1,3 +1,4 @@
+function [ par,d] = fit_line( XY )
 % FITLINE - Least squares fit of a line to a set of points
 %
 % Usage:   [C, dist] = fitline(XY)
@@ -23,7 +24,6 @@
 % point (x,y) to the line to be simply calculated as
 %   r = abs(c(1)*X + c(2)*Y + c(3))
 %
-%
 % If you want to convert this line representation to the classical form 
 %     Y = a*X + b
 % use
@@ -48,11 +48,15 @@
 
 % June      2003 - Original version
 % September 2004 - Rescaling to allow simple distance calculation.
-% November  2008 - Normalising of coordinates added to condition the solution.
+% November  2008 - Normalising of coordinates added to condition the
+%                  solution.
+% December  2016 - Simplified rescaling of coefficients to allow line
+%                  distances to be calculated
 
-function [C, dist] = fitline(XY)
   
-  [rows,npts] = size(XY);    
+  [rows,npts] = size(XY);
+  
+  
 
   if npts < 2
       error('Too few points to fit line');
@@ -62,12 +66,12 @@ function [C, dist] = fitline(XY)
       XY = [XY; ones(1,npts)];
   end
 
-  if npts == 2    % Pad XY with a third column of zeros
-    XY = [XY zeros(3,1)]; 
-  end
+  if npts == 2    
+    C = cross(XY(:,1), XY(:,2));
+  else
   
   % Normalise points so that centroid is at origin and mean distance from
-  % origin is sqrt(2).  This conditions the equations
+  % origin is sqrt(2).  This conditions the equations. 
   [XYn, T] = normalise2dpts(XY);
   
   % Set up constraint equations of the form  XYn'*C = 0,
@@ -79,36 +83,17 @@ function [C, dist] = fitline(XY)
 
   % Denormalise the solution
   C = T'*C;
-  
+  end
   % Rescale coefficients so that line equation corresponds to
   %   sin(theta)*X + (-cos(theta))*Y + rho = 0
   % so that the perpendicular distance from any point (x,y) to the line
   % to be simply calculated as 
   %   r = abs(c(1)*X + c(2)*Y + c(3))
-
-  theta = atan2(C(1), -C(2));
-
-  % Find the scaling (but avoid dividing by zero)
-  if abs(sin(theta)) > abs(cos(theta))
-      k = C(1)/sin(theta);
-  else
-      k = -C(2)/cos(theta);
-  end
+  C = C / sqrt(C(1)^2 + C(2)^2);
   
-  C = C/k;
-  
+  par = C;
   % If requested, calculate the distances from the fitted line to
   % the supplied data points 
   if nargout==2   
       dist = abs(C(1)*XY(1,:) + C(2)*XY(2,:) + C(3));
   end
-
-
-
-
-  
-       
-       
-
-end
-

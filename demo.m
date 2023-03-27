@@ -61,6 +61,11 @@ figure
 subplot(1,2,1); gscatter(X(1,:),X(2,:),G); axis equal; title('GroundTruth'); legend off
 subplot(1,2,2); gscatter(X(1,:),X(2,:),C); axis equal; title('T linkage'); legend off
 
+%%
+W = linkage_to_tree(T);
+root = W(end, 3);
+[OK, gBefore, gAfter, V, AgtB] = explore(root, X, W)
+
 %% Reference
 % When using the code in your research work, please cite the following paper:
 % Luca Magri, Andrea Fusiello, T-Linkage: A Continuous Relaxation of

@@ -14,6 +14,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AgtB] = explore(C, X, tree)
     S = C;                     % stack - init: root node
     
     figure
+    
     while ~isempty(S)
         
         currNode = S(1);
@@ -25,24 +26,34 @@ function [OK, gScoreBefore, gScoreAfter, V, AgtB] = explore(C, X, tree)
         XR = X(:, idxR);    % points in cluster corresponding to right node
         XLR = X(:, union(idxL, idxR));  % points in current cluster
         
-%         disp(["XL" size(XL)])
-%         disp(["XR" size(XR)])
-%         disp(["XLR" size(XLR)])
-%         disp(["Current node: " currNode])
+        %disp(XL)
+        %disp(XR)
+        disp(["XLR" size(XLR)])
+        disp(["Current node: " currNode])
         
-        [newOk, gricScore] = isMergeableGricLine(XLR, XL, XR, ...
+        [newOk, gricScore, out] = isMergeableGricLine(XLR, XL, XR, ...
             lambda1, lambda2, sigma);
         
         OK(end+1) = newOk;
         gScoreBefore(end+1) = gricScore.gric.before;
         gScoreAfter(end+1) = gricScore.gric.after;
         
+        subplot(1, 2, 1)
+        plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
+        xlim([-1 1])
+        ylim([-1 1])
+        axis square
+        
+        subplot(1, 2, 2)
         plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
+        xlim([-1 1])
+        ylim([-1 1])
         if size(XL, 2) >= 2
             cXL = fitline(XL);
         end
         hold on
         plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
+        axis square
         if size(XR, 2) >= 2
             cXR = fitline(XR);
         end
@@ -69,8 +80,10 @@ function [OK, gScoreBefore, gScoreAfter, V, AgtB] = explore(C, X, tree)
         disp(["Visited Node : " currNode])
         disp(["Stack : " S])
         
-        %hold off
-        pause(1)
+        hold off
+        %pause(1)
+        
+
     
     end
     

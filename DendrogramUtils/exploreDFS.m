@@ -101,14 +101,9 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
         elseif gScoreAfter(end) > gScoreBefore(end)
             S = [[childL childR] S];
         end
-        
-        % disp([["Visited Node : " currNode] [" -- Stack : " S]])
 
         hold off
-        
-%         if any(isnan(out.ri)) || any(isnan(out.rj)) || any(isnan(out.rij))
-%             pause(5)
-%         end
+
         perc = round(length(V)/size(tree, 1), 2);
         % Update the waitbar every wait_step iterations
         if mod(it, wait_step) == 0
@@ -129,38 +124,6 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
     
     plot(idxAltB, gScoreAfter(idxAltB), "o", "MarkerSize", 7, "MarkerFaceColor", "g");
     legend("Gric before", "Gric after", "gAfter < gBefore")
-  
-    %% NO SENSE, JUST TRIALS
-%     for k = C:-1:(size(X,2)+1)
-%         disp(k)
-%         [childL, childR] = get_children(C, tree);
-%         
-%         
-%         idxL = get_cluster_idxPoints(childL, X, tree);
-%         idxR = get_cluster_idxPoints(childR, X, tree);
-%         disp(["size idxL", size(idxL)])
-%         disp(["size idxR", size(idxR)])
-%         XL = X(:, idxL);
-%         XR = X(:, idxR);
-%         XLR = X(:, union(idxL, idxR));
-%         %hold off;
-        
-% 
-%         %hold on
-% 
-%         %scatter(XL(1, :), XL(2, :), "MarkerFaceColor", "g")
-%         %legend("Left-Cluster", "Right Cluster")
-%         %cXL = fitline(XL);
-%         %drawLines(cXL);
-%         %hold off
-%         
-%         [newOk, msScore] = isMergeableGricLine(XLR, XL, XR, lambda1, lambda2, sigma);
-%         OK = [OK newOk];
-%         %subplot(1, 3, 3);
-%         plot(X, "--")
-%         hold on
-%     end
-%     
-    
+ 
 end
 

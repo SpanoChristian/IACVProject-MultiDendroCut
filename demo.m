@@ -3,7 +3,9 @@ addpath(genpath('.'));
 % "star5".
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
-load './Dataset/star5.mat'; N = size(X,2);
+load './Dataset/JLinkageExamples.mat'; 
+X = Xnew;
+N = size(X,2);
 % In order to work with a specific model, T-Linkage needs to be given:
 % - distFun: distance between points and models
 % - hpFun: returns an estimate model given cardmss points
@@ -16,6 +18,7 @@ load './Dataset/star5.mat'; N = size(X,2);
 %
 
 [distFun, hpFun, fit_model, cardmss] = set_model('line');
+
 %% Conceptual representation of points
 
 %T-linkage starts, as Ransac with random sampling:
@@ -58,45 +61,14 @@ C  = outlier_rejection_card( C, cardmss );
 % Outliers are labelled by '0'
 %% Showing results
 figure
-subplot(1,2,1); gscatter(X(1,:),X(2,:),G); axis equal; title('GroundTruth'); legend off
-subplot(1,2,2); gscatter(X(1,:),X(2,:),C); axis equal; title('T linkage'); legend off
-
+subplot(1,2,1); gscatter(X(1,:),X(2,:), G); axis equal; title('GroundTruth'); legend off
+subplot(1,2,2); gscatter(X(1,:),X(2,:), C); axis equal; title('T linkage'); legend off
 %%
 W = linkage_to_tree(T);
 root = W(end, 3);
-[OK, gBefore, gAfter, V, AgtB] = exploreDFS(root, X, W);
-
-%%
-[childL, childR] = get_children(984, W);
-idxL = get_cluster_idxPoints(childL, X, W);
-idxR = get_cluster_idxPoints(childR, X, W);
-XL = X(:, idxL);    % points in cluster corresponding to left node
-XR = X(:, idxR);    % points in cluster corresponding to right node
-XLR = X(:, union(idxL, idxR));  % points in current cluster
-
-figure
-subplot(1, 2, 1)
-plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
-title("Joined Cluster")
-xlim([-1 1])
-ylim([-1 1])
-axis square
-
-subplot(1, 2, 2)
-plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
-title("Cluster split")
-xlim([-1 1])
-ylim([-1 1])
-hold on
-plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
-axis square
-
-cXR = fitline(XR);
-drawLines(cXR, "--", "b")
-drawnow;
-
-res_line( XR, cXR )
-
+[OK, gBefore, gAfter, V, AltB] = exploreDFS(root, X, W);
+lbls = plot_cut_clusters(X, W, AltB, G, C);
+compare_clustering(G, C, lbls)
 %% Reference
 % When using the code in your research work, please cite the following paper:
 % Luca Magri, Andrea Fusiello, T-Linkage: A Continuous Relaxation of

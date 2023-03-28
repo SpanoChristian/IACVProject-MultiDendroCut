@@ -20,26 +20,26 @@ ariScore = [ari1 ari2];
 nmiScore = [nmi1 nmi2];
 
 % Print the results
-fprintf('ARI of algorithm 1: %f\n', ari1);
-fprintf('ARI of algorithm 2: %f\n', ari2);
-fprintf('NMI of algorithm 1: %f\n', nmi1);
-fprintf('NMI of algorithm 2: %f\n', nmi2);
+fprintf('ARI of T-Linkage: %f\n', ari1);
+fprintf('ARI of Dynamic T-Linkage: %f\n', ari2);
+fprintf('NMI of T-Linkage: %f\n', nmi1);
+fprintf('NMI of Dynamic T-Linkage: %f\n', nmi2);
 
 % Compare the two algorithms
 if ari1 > ari2
-    fprintf('Algorithm 1 has a higher ARI than algorithm 2\n');
+    fprintf('T-Linkage has a higher ARI than Dynamic T-Linkage\n');
 elseif ari2 > ari1
-    fprintf('Algorithm 2 has a higher ARI than algorithm 1\n');
+    fprintf('Dynamic T-Linkage has a higher ARI than T-Linkage\n');
 else
-    fprintf('Algorithm 1 and algorithm 2 have the same ARI\n');
+    fprintf('T-Linkage and Dynamic T-Linkage have the same ARI\n');
 end
 
 if nmi1 > nmi2
-    fprintf('Algorithm 1 has a higher NMI than algorithm 2\n');
+    fprintf('T-Linkage has a higher NMI than Dynamic T-Linkage\n');
 elseif nmi2 > nmi1
-    fprintf('Algorithm 2 has a higher NMI than algorithm 1\n');
+    fprintf('Dynamic T-Linkage has a higher NMI than T-Linkage\n');
 else
-    fprintf('Algorithm 1 and algorithm 2 have the same NMI\n');
+    fprintf('T-Linkage and Dynamic T-Linkage have the same NMI\n');
 end
 
 end

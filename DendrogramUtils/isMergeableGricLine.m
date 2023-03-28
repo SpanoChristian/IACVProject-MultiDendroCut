@@ -40,28 +40,28 @@ if size(Xi, 2) >= 2
     mi = fitline(Xi);
     ri = res_line(Xi, mi);
 else
-    ri = 100;
+    ri = 10;
 end
 
 if size(Xj, 2) >= 2
     mj = fitline(Xj);
     rj = res_line(Xj, mj);
 else
-    rj = 100;
+    rj = 10;
 end
 
 if size(Xij, 2) >= 2
     mij = fitline(Xij);
     rij = res_line(Xij, mij);
 else
-    rij = 100;
+    rij = 10;
 end
 
 % compute squared residual
 rSqri = ri.^2;
 rSqrj = rj.^2;
 rSqrij = rij.^2;
-if(nargin < 7)
+if(nargin < 6)
 % compute std
     sigmai = std(rSqri);
     sigmaj= std(rSqrj);
@@ -97,4 +97,23 @@ msOutput.Xij = Xij;
 msOutput.ri = ri;
 msOutput.rj = rj;
 msOutput.rij = rij;
+
+if all(isnan(mean(ri, 'omitnan')))
+    msOutput.Mri = 100;
+else
+    msOutput.Mri = mean(ri, 'omitnan');
+end
+
+if all(isnan(mean(rj, 'omitnan')))
+    msOutput.Mrj = 100;
+else
+    msOutput.Mrj = mean(rj, 'omitnan');
+end
+
+if all(isnan(mean(rij, 'omitnan')))
+    msOutput.Mrij = 100;
+else
+    msOutput.Mrij = mean(rij, 'omitnan');
+end
+
 end

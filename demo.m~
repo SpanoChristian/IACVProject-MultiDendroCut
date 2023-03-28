@@ -67,35 +67,11 @@ root = W(end, 3);
 [OK, gBefore, gAfter, V, AgtB] = exploreDFS(root, X, W);
 
 %%
-[childL, childR] = get_children(984, W);
-idxL = get_cluster_idxPoints(childL, X, W);
-idxR = get_cluster_idxPoints(childR, X, W);
-XL = X(:, idxL);    % points in cluster corresponding to left node
-XR = X(:, idxR);    % points in cluster corresponding to right node
-XLR = X(:, union(idxL, idxR));  % points in current cluster
-
-figure
-subplot(1, 2, 1)
-plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
-title("Joined Cluster")
-xlim([-1 1])
-ylim([-1 1])
-axis square
-
-subplot(1, 2, 2)
-plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
-title("Cluster split")
-xlim([-1 1])
-ylim([-1 1])
-hold on
-plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
-axis square
-
-cXR = fitline(XR);
-drawLines(cXR, "--", "b")
-drawnow;
-
-res_line( XR, cXR )
+idxL = get_cluster_idxPoints(childL, X, tree);
+    idxR = get_cluster_idxPoints(childR, X, tree);
+    XL = X(:, idxL);    % points in cluster corresponding to left node
+    XR = X(:, idxR);    % points in cluster corresponding to right node
+    XLR = X(:, union(idxL, idxR));  % points in current cluster
 
 %% Reference
 % When using the code in your research work, please cite the following paper:

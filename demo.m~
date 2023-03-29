@@ -113,11 +113,11 @@ plot(0.01:0.015:0.2, misclassErr(:, 1), "-", "LineWidth", 2, ...
 hold on
 plot(0.01:0.015:0.2, misclassErr(:, 2), "-", "LineWidth", 2, ...
     "Marker", "+")
-lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
+lgd = legend("T-Linkage ME", "Dynamic Cut");
 lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. Dynamic T-Linkage")
 xlabel("\epsilon", "FontSize", 15)
-ylabel("Misclassification Error", "FontSize", 14)
+ylabel("ARI & NMI", "FontSize", 14)
 
 %%
 figure

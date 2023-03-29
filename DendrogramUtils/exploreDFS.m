@@ -1,8 +1,6 @@
-function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
+function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambda1, lambda2)
     
     epsi = 2e-2; % inlier threhsold
-    lambda1 = 1;
-    lambda2 = 2;
     sigma = epsi;
     OK = false(1, 0);
     gScoreBefore = [];
@@ -13,22 +11,22 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
     gComplexityAfter = [];
     perc = 0;
     
-    % Initialize the waitbar
-    wait_step = 10; % Update waitbar every wait_step iterations
-    h = waitbar(0, 'Exploring the nodes to be cut...');
+%     % Initialize the waitbar
+%     wait_step = 10; % Update waitbar every wait_step iterations
+%     h = waitbar(0, 'Exploring the nodes to be cut...');
     
     % Idea: Depth-First-Search + apply GRIC at each visited node
      
     V = [];                    % visited nodes
     S = C;                     % stack - init: root node
     
-    figure
+%     figure
     
-    it = 1;
+%     it = 1;
     
     while ~isempty(S)
         
-        disp("------- New Iteration -------")
+%         disp("------- New Iteration -------")
         currNode = S(1);
         [childL, childR] = get_children(currNode, tree);
        
@@ -38,9 +36,9 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
         XR = X(:, idxR);    % points in cluster corresponding to right node
         XLR = X(:, union(idxL, idxR));  % points in current cluster
         
-        disp([[" XL size : " size(XL)]; [" XR size : " size(XR)]; ...
-              ["XLR size : " size(XLR)]])
-        disp(["Current Node : " currNode])
+%         disp([[" XL size : " size(XL)]; [" XR size : " size(XR)]; ...
+%               ["XLR size : " size(XLR)]])
+%         disp(["Current Node : " currNode])
           
         [newOk, gricScore, ~] = isMergeableGricLine(XLR, XL, XR, ...
             lambda1, lambda2, sigma);
@@ -52,43 +50,43 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
         gFidelityAfter(end+1) = gricScore.fidelity.after;
         gComplexityBefore(end+1) = gricScore.complexity.before;
         gComplexityAfter(end+1) = gricScore.complexity.after;
+%         
+%         disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
+%             ["Fidelity After : " gFidelityAfter(end)]; ...
+%             ["Complexity Before : " gComplexityBefore(end)]; ...
+%             ["Complexity After : " gComplexityAfter(end)]])
+%         
+%         disp(gScoreAfter(end) + " <= " + gScoreBefore(end) + " ?")
         
-        disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
-            ["Fidelity After : " gFidelityAfter(end)]; ...
-            ["Complexity Before : " gComplexityBefore(end)]; ...
-            ["Complexity After : " gComplexityAfter(end)]])
-        
-        disp(gScoreAfter(end) + " <= " + gScoreBefore(end) + " ?")
-        
-        subplot(1, 2, 1)
-        plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
-        title("Joined Cluster")
-        xlim([-1 1])
-        ylim([-1 1])
-        axis square
-        
-        subplot(1, 2, 2)
-        plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
-        title("Cluster split")
-        xlim([-1 1])
-        ylim([-1 1])
-        axis square
-        if size(XL, 2) >= 2
-            cXL = fitline(XL);
-        end
-        hold on
-        plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
-        axis square
-        if size(XR, 2) >= 2
-            cXR = fitline(XR);
-        end
-        
-        drawLines(cXL, "--", "b")
-        drawnow;
-        drawLines(cXR, "--", "r")
-        drawnow;
-        legend("L Clust", "R Clust", "FitLine L", "Fitline R")   
-        
+%         subplot(1, 2, 1)
+%         plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
+%         title("Joined Cluster")
+%         xlim([-1 1])
+%         ylim([-1 1])
+%         axis square
+%         
+%         subplot(1, 2, 2)
+%         plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
+%         title("Cluster split")
+%         xlim([-1 1])
+%         ylim([-1 1])
+%         axis square
+%         if size(XL, 2) >= 2
+%             cXL = fitline(XL);
+%         end
+%         hold on
+%         plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
+%         axis square
+%         if size(XR, 2) >= 2
+%             cXR = fitline(XR);
+%         end
+%         
+%         drawLines(cXL, "--", "b")
+%         drawnow;
+%         drawLines(cXR, "--", "r")
+%         drawnow;
+%         legend("L Clust", "R Clust", "FitLine L", "Fitline R")   
+%         
         V = [V currNode];
         S(1) = [];
         
@@ -101,29 +99,29 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree)
         elseif gScoreAfter(end) > gScoreBefore(end)
             S = [[childL childR] S];
         end
+% 
+%         hold off
 
-        hold off
-
-        perc = round(length(V)/size(tree, 1), 2);
-        % Update the waitbar every wait_step iterations
-        if mod(it, wait_step) == 0
-            waitbar(perc, h, sprintf('Progress: %d%%', perc*100));
-        end
-        
-        it = it + 1;
+%         perc = round(length(V)/size(tree, 1), 2);
+%         % Update the waitbar every wait_step iterations
+%         if mod(it, wait_step) == 0
+%             waitbar(perc, h, sprintf('Progress: %d%%', perc*100));
+%         end
+%         
+%         it = it + 1;
         
     end
     
-    figure
-    plot(gScoreBefore, "r-", "LineWidth", 1)
-    hold on
-    plot(gScoreAfter, "b--", "LineWidth", 1)
-    
+%     figure
+%     plot(gScoreBefore, "r-", "LineWidth", 1)
+%     hold on
+%     plot(gScoreAfter, "b--", "LineWidth", 1)
+   
     [~, idxAltB] = find(gScoreAfter < gScoreBefore);
     AltB = V(idxAltB);
-    
-    plot(idxAltB, gScoreAfter(idxAltB), "o", "MarkerSize", 7, "MarkerFaceColor", "g");
-    legend("Gric before", "Gric after", "gAfter < gBefore")
+%     
+%     plot(idxAltB, gScoreAfter(idxAltB), "o", "MarkerSize", 7, "MarkerFaceColor", "g");
+%     legend("Gric before", "Gric after", "gAfter < gBefore")
  
 end
 

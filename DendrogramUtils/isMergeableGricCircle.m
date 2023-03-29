@@ -1,4 +1,4 @@
-function [ok, msScore, msOutput] = isMergeableGricLine(X, XL, XR, lambda1, lambda2, sigma)
+function [ok, msScore, msOutput] = isMergeableGricCircle(X, XL, XR, lambda1, lambda2, sigma)
 % Check if two clusters A and B can be merged.
 % The test performs the following steps:
 % i) a model i on the first cluster is computed
@@ -37,22 +37,22 @@ Xj = XR;
 Xij = X;
 % fit a model on Ci, Cj and Ci U Cj
 if size(Xi, 2) >= 2
-    mi = fitline(Xi);
-    ri = res_line(Xi, mi);
+    mi = fit_circles(Xi);
+    ri = res_circle(Xi, mi);
 else
     ri = 10;
 end
 
 if size(Xj, 2) >= 2
-    mj = fitline(Xj);
-    rj = res_line(Xj, mj);
+    mj = fit_circles(Xj);
+    rj = res_circle(Xj, mj);
 else
     rj = 10;
 end
 
 if size(Xij, 2) >= 2
-    mij = fitline(Xij);
-    rij = res_line(Xij, mij);
+    mij = fit_circles(Xij);
+    rij = res_circle(Xij, mij);
 else
     rij = 10;
 end
@@ -80,7 +80,7 @@ mcBefore = mci + mcj;
 %% compare gric score
 ok = gAfter < gBefore;
 %% package result
-msScore.model = 'line';
+msScore.model = 'circle';
 msScore.gric.before = gBefore;
 msScore.fidelity.before = dfBefore;
 msScore.complexity.before = mcBefore;

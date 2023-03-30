@@ -1,4 +1,4 @@
-function [misclassErr, ariScore, nmiScore, l1, l2] = outliersRobustnessComparison(X, G)
+function [misclassErr, ariScore, nmiScore, l1, l2] = inlierThresholdComparison(X, G)
 
     N = size(X, 2);
     [distFun, hpFun, ~, cardmss] = set_model('line');
@@ -17,7 +17,7 @@ function [misclassErr, ariScore, nmiScore, l1, l2] = outliersRobustnessCompariso
         tic
         P = prefMat(R, epsilon, 1);
         [C, T] = tlnk(P);
-        C = outlier_rejection_card(C, cardmss);
+        % C = outlier_rejection_card(C, cardmss);
         W = linkage_to_tree(T);
         root = W(end, 3);
 
@@ -30,7 +30,7 @@ function [misclassErr, ariScore, nmiScore, l1, l2] = outliersRobustnessCompariso
         l1(end+1) = bestLambda1;
         l2(end+1) = bestLambda2;
 
-        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2);
+        [~, ~, ~, ~, AltB] = exploreBFS(root, X, W, bestLambda1, bestLambda2);
         lblsDynCut = labelsAfterDynCut(X, W, AltB);
         [misclassErr(k, :), ariScore(k, :), nmiScore(k, :)] = compareClustering(G, C, lblsDynCut);
         

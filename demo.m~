@@ -3,8 +3,8 @@ addpath(genpath('.'));
 % "star5".
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
-load './Dataset/Star5.mat';
-% X = X';
+load './Dataset/JLinkageExamples.mat';
+X = Star5_S00075_O75;
 N = size(X, 2);
 % In order to work with a specific model, T-Linkage needs to be given:
 % - distFun: distance between points and models
@@ -16,8 +16,15 @@ N = size(X, 2);
 % Other  possible models are 'line', 'circle',
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
-[distFun, hpFun, fit_model, cardmss] = set_model('line');
+%%
+G = [];
 
+for i = 1:11
+    G = [G; i*ones(50, 1)];
+end
+G(end:end+550) = 0;
+%%
+[distFun, hpFun, fit_model, cardmss] = set_model('line');
 %% Conceptual representation of points
 
 %T-linkage starts, as Ransac with random sampling:
@@ -39,14 +46,22 @@ R = res(X, H, distFun);
 % preferences.
 % 
 
-epsilon = 0.85e-1; % An inlier threshold value  epsilon has to be specified.
+epsilon = 0.07; % An inlier threshold value  epsilon has to be specified.
 P = prefMat(R, epsilon, 1);
 
 %% Clustering
 
 %T-Linkage clustering follow a bottom up scheme in the preference space
 
+tic
 [C, T] = tlnk(P);
+elapsed_time = toc;
+fprintf('T-Linkage took %f seconds\n', elapsed_time);
+
+tic
+[C, T] = tlnk(P);
+elapsed_time = toc;
+fprintf('T-Linkage Fast took %f seconds\n', elapsed_time);
 
 % C is a vector of labels, points belonging to the same models share the
 % same label.
@@ -56,7 +71,7 @@ P = prefMat(R, epsilon, 1);
 %different ways (T-Linkage is agonostic about the outlier rejection strategy),
 %for example discarding too small cluster, or exploiting the randomness of
 %a model.
-C  = outlier_rejection_card( C, cardmss );
+%C  = outlier_rejection_card( C, cardmss );
 % Outliers are labelled by '0'
 %% Showing results
 figure
@@ -77,7 +92,7 @@ vals2 = 10:10:140;
     G, C, vals1, vals2);
 
 %%
-[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2);
+[~, ~, ~, ~, AltB] = exploreBFS(root, X, W, bestLambda1, bestLambda2);
 lblsDynCut = labelsAfterDynCut(X, W, AltB);
 [ariScore, nmiScore] = compareClustering(G, C, lblsDynCut);
 %%
@@ -97,40 +112,61 @@ subplot(1, 3, 3)
 gscatter(X(1,:), X(2,:), lblsDynCut); axis square; title('T linkage w/ Dynamic Cut');
 
 %%
+candidateOutliers = outliersNeighbour(X');
+lblsDynCut(candidateOutliers) = 0;
+%%
 % Find the misclassified points
-misclassified_points = find(G ~= lblsDynCut);
+misclassified_pointsTLink = find(G ~= C);
+misclassified_pointsDynTLink = find(G ~= lblsDynCut);
 
 % Calculate the misclassification error
-misclassification_error = length(misclassified_points) / length(G);
+misclassification_errorTLink = length(misclassified_pointsTLink) / length(G);
+misclassification_errorDynTLink = length(misclassified_pointsDynTLink) / length(G);
 
 % Display the misclassification error
-disp(['Misclassification error: ' num2str(misclassification_error)]);
+disp(['Misclassification error T-Linkage: ' num2str(misclassification_errorTLink)]);
+disp(['Misclassification error Dynamic T-Linkage: ' num2str(misclassification_errorDynTLink)]);
 
-%%
+%% INLIER THRESHOLD COMPARISON
+%load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 figure
-plot(0.01:0.015:0.2, misclassErr(:, 1), "-", "LineWidth", 2, ...
+plot(0.01:0.015:0.2, smoothdata(misclassErr(:, 1)), "-", "LineWidth", 2, ...
     "Marker", "o")
 hold on
-plot(0.01:0.015:0.2, misclassErr(:, 2), "-", "LineWidth", 2, ...
+plot(0.01:0.015:0.2, smoothdata(misclassErr(:, 2)), "-", "LineWidth", 2, ...
     "Marker", "+")
-lgd = legend("T-Linkage ME", "Dynamic Cut");
+lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
 lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. Dynamic T-Linkage")
-xlabel("\epsilon", "FontSize", 15)
-ylabel("ARI & NMI", "FontSize", 14)
+xlabel("\epsilon", "FontSize", 16)
+ylabel("Misclassification Error", "FontSize", 14)
 
+%% OUTLIER PERCENTAGE COMPARISON
+figure
+plot(0:0.10:1, misclassErr(:, 1), "-", "LineWidth", 2, ...
+    "Marker", "o")
+hold on
+plot(0:0.10:1, misclassErr(:, 2), "-", "LineWidth", 2, ...
+    "Marker", "+")
+lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
+lgd.FontSize = 15; % Change the font size to 14 points
+title("Comparison T-Linkage vs. Dynamic T-Linkage")
+xlabel("Outlier %", "FontSize", 14)
+ylabel("Misclassification Error", "FontSize", 14)
+ylim([0, 0.4])
 %%
 figure
-load("./DendrogramUtils/Scores&Params.mat")
-plot(0.1e-1:0.25e-1:4.86, smoothdata(ariScore(:, 1)), "--", "LineWidth", 2)
+%load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
+v = 0.01:0.015:0.2;
+plot(v, smoothdata(ariScore(:, 1)), "--", "LineWidth", 2, "Color", "#D95319")
 hold on
-plot(0.1e-1:0.25e-1:4.86, smoothdata(ariScore(:, 2)), "-", "LineWidth", 2)
-plot(0.1e-1:0.25e-1:4.86, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2)
-plot(0.1e-1:0.25e-1:4.86, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2)
+plot(v, smoothdata(ariScore(:, 2)), "-", "LineWidth", 2, "Color", "#D95319")
+plot(v, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2, "Color", "#0072BD")
+plot(v, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2, "Color", "#0072BD")
 lgd = legend("ARI T-Linkage", "ARI Dyn T-Linkage", "NMI T-Linkage", "NMI Dyn T-Linkage");
 lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. Dynamic T-Linkage")
-xlabel("\epsilon", "FontSize", 15)
+xlabel("\epsilon", "FontSize", 16)
 ylabel("ARI & NMI", "FontSize", 14)
 
 %% Reference

@@ -1,4 +1,5 @@
 function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, vals1, vals2)
+    % ARI = zeros(length(vals1), length(vals2));
     misclassErr = zeros(length(vals1), length(vals2));
     
 %     wait_step = 1; % Update waitbar every wait_step iterations
@@ -9,7 +10,7 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, vals1,
     for lambda1 = vals1
         k2 = 1;
         for lambda2 = vals2
-            [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda1, lambda2);
+            [~, ~, ~, ~, AltB] = exploreBFS(root, X, W, lambda1, lambda2);
             lbls = labelsAfterDynCut(X, W, AltB);
             [ME, ~, ~] = compareClustering(G, C, lbls);
             misclassErr(k1, k2) = ME(2);

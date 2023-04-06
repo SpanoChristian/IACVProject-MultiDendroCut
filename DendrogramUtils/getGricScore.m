@@ -1,24 +1,26 @@
 function [gScore, dataFidelity, modelComplexity] = getGricScore(rSqr, sigma, lambda1, lambda2)
 %GETGRICSCORE 
-% k number of parameters;
-% d dimension of the manifold
-% r dimension of the space
 
 n = numel(rSqr);
 % stdN = clustStats.stdN;
 % confInt = clustStats.CI;
 % meanN = round(mean(confInt));
 
-dataFidelity = sum(min(rSqr./sigma^2, 2));
-modelComplexity = 1/(exp(-(((n-lambda1)/(lambda2)))^(2)));
-%modelComplexity = 100/(1 + 100*(exp(-(((n-lambda1)/(lambda2)))^(2))));
+% Sum for number of rSqr element
+%dataFidelity = sum(min(rSqr./sigma^2, 2));
+
+dataFidelity = min(mean(rSqr, 'omitnan'), 50);
+%modelComplexity = 1/(exp(-(((n-lambda1)/(lambda2)))^(2)));
+%modelComplexity = 10/(exp(-(((n-lambda1)/(lambda2)))^(2))+(1/10));
+modelComplexity = (n - lambda2)^2;
 gScore = dataFidelity + modelComplexity;
 
 % disp([["Num Points : " n]; ...
-%       ["Min Res    : " min(rSqr./sigma^2)]; ...
+%       ["Min Res    : " mean(rSqr)]; ...
 %       ["Complexity : " modelComplexity]; ...
 %       ["Fidelity   : " dataFidelity]; ...
 %       ["gScore     : " gScore]])
+% disp(["C/Gscore : " modelComplexity + " vs. " + dataFidelity]);
 
 end
 

@@ -1,7 +1,7 @@
 function outliers = outliersNeighbour(X)
 
 % Define the number of neighbors to use in LOF calculation
-k = 50;
+k = 40;
 
 % Calculate pairwise distances between data points
 D = pdist2(X, X);
@@ -37,8 +37,8 @@ thresh = 1.45;
 outliers = find(lof >= thresh);
 
 % Display the outliers
-disp('The following data points are outliers:');
-disp(outliers);
+% disp('The following data points are outliers:');
+% disp(outliers);
 
 %     
 %     outK = [];

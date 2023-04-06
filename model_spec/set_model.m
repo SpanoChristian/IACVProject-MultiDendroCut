@@ -20,7 +20,7 @@ switch model
     case 'circle'
         distFun = @distPointCircle;
         hpFun = @hpCircles;
-        fit_model = @fit_circles;
+        fit_model = @fit_circle;
         cardmss = 3;
     case 'fundamental'
         distFun = @distPointFm;

@@ -36,22 +36,22 @@ Xi = XL;
 Xj = XR;
 Xij = X;
 % fit a model on Ci, Cj and Ci U Cj
-if size(Xi, 2) >= 2
-    mi = fit_circles(Xi);
+if size(Xi, 2) >= 3
+    mi = fit_circle(Xi);
     ri = res_circle(Xi, mi);
 else
     ri = 10;
 end
 
-if size(Xj, 2) >= 2
-    mj = fit_circles(Xj);
+if size(Xj, 2) >= 3
+    mj = fit_circle(Xj);
     rj = res_circle(Xj, mj);
 else
     rj = 10;
 end
 
-if size(Xij, 2) >= 2
-    mij = fit_circles(Xij);
+if size(Xij, 2) >= 3
+    mij = fit_circle(Xij);
     rij = res_circle(Xij, mij);
 else
     rij = 10;

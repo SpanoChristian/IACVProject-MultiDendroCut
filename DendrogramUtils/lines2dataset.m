@@ -13,7 +13,7 @@ function [X, G] = lines2dataset(P)
         % Initialize empty arrays to store the data points
         x_data = [];
         y_data = [];
-        noise_level = 0.05 + rand() * 0.05;
+        noise_level = 0.01 + rand() * 0.009;
         % Generate data points until we have 50 that lie within the range [-0.75, 0.75]
         while length(x_data) < 50
             % Generate a random x value within the range [-0.75, 0.75]
@@ -34,12 +34,14 @@ function [X, G] = lines2dataset(P)
         
     end
     
-%     % Add outliers
-%     x_out = -0.65 + rand(1, 50) * 1.3;
-%     y_out = -0.65 + rand(1, 50) * 1.3;
-%     
-%     X = [X [x_out; y_out]];
-%     G = [G; 0*ones(length(x_out), 1)];
+    % Add outliers
+    x_out = -0.65 + rand(1, 150) * 1.3;
+    y_out = -0.65 + rand(1, 150) * 1.3;
+    
+    X = [X [x_out; y_out]];
+    G = [G; 0*ones(length(x_out), 1)];
+    
+    gscatter(X(1, :), X(2, :), G)
     
 end
 

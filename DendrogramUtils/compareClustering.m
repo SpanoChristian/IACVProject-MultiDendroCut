@@ -1,4 +1,4 @@
-function [misclassErr, ariScore, nmiScore] = compareClustering(y_true, y_pred1, y_pred2)
+function [misclassErr, ariScore, nmiScore, arinmiScore] = compareClustering(y_true, y_pred1, y_pred2)
 % Computes the Adjusted Rand Index and Normalized Mutual Information for two sets of cluster labels
 % Inputs:
 %   - y_true: true labels of the data points
@@ -23,4 +23,5 @@ nmi2 = nmi(y_true, y_pred2);
 misclassErr = [me1 me2];
 ariScore = [ari1 ari2];
 nmiScore = [nmi1 nmi2];
+arinmiScore = [ari1.*nmi1 ari2.*nmi2];
 end

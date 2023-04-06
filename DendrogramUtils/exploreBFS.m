@@ -1,7 +1,6 @@
-function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambda1, lambda2)
+function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreBFS(C, X, tree, lambda1, lambda2, inlierThreshold)
     
-    epsi = 2e-2; % inlier threhsold
-    sigma = epsi;
+    sigma = inlierThreshold;
     OK = false(1, 0);
     gScoreBefore = [];
     gScoreAfter = [];

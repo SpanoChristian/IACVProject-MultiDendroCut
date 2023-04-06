@@ -2,6 +2,10 @@ function [X, G] = generateDataset(num_clusters)
     X = [];
     G = [];
     
+    figure
+    xlim([-1 1])
+    ylim([-1 1])
+    
     for i = 1:num_clusters+1
         if i == num_clusters+1
             title("Outliers", "FontSize", 15)

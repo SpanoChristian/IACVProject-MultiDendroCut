@@ -3,27 +3,31 @@ addpath(genpath('.'));
 % "star5".
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
-load './Dataset/star5.mat';
-%X = Star5_S00075_O75;
+
+% load './Dataset/Star5.mat';
+load './Dataset/JLinkageExamples.mat'
+X = Star11_S00075_O50;
+% X = Circles5_S00075_O50;
+
 N = size(X, 2);
 % In order to work with a specific model, T-Linkage needs to be given:
 % - distFun: distance between points and models
 % - hpFun: returns an estimate model given cardmss points
 % - fit_model: least square fitting function
-% 
+
+% If the ground truth labels are provided: true
+% Otherwise: false
+labelled_data = false;
+
 % In this example we want to estimate lines so distFun is the euclidean
 % distance between a point from a line in the plane and cardmss=2.
 % Other  possible models are 'line', 'circle',
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
-%%
-G = [];
-
-for i = 1:5
-    G = [G; i*ones(50, 1)];
+if ~labelled_data
+    G = generateGTLbls(11, 50, 550); %#ok<UNRCH>
 end
-G(end:end+250) = 0;
-%%
+
 [distFun, hpFun, fit_model, cardmss] = set_model('line');
 %% Conceptual representation of points
 
@@ -46,7 +50,7 @@ R = res(X, H, distFun);
 % preferences.
 % 
 
-epsilon = 0.07; % An inlier threshold value  epsilon has to be specified.
+epsilon = 0.095; % An inlier threshold value  epsilon has to be specified.
 P = prefMat(R, epsilon, 1);
 
 %% Clustering
@@ -63,30 +67,29 @@ P = prefMat(R, epsilon, 1);
 %different ways (T-Linkage is agonostic about the outlier rejection strategy),
 %for example discarding too small cluster, or exploiting the randomness of
 %a model.
-%C  = outlier_rejection_card( C, cardmss );
+C  = outlier_rejection_card( C, cardmss );
 % Outliers are labelled by '0'
 %% Showing results
 figure
 subplot(1,2,1); gscatter(X(1,:),X(2,:), G); axis equal; title('GroundTruth'); legend off
 subplot(1,2,2); gscatter(X(1,:),X(2,:), C); axis equal; title('T linkage'); legend off
-%% 
-% [~, ~, stdN, confInt] = clusterNumPoints(C)
-% clustStats.stdN = stdN;
-% clustStats.CI = confInt;
+%%
+[~, meanN, stdN, confInt] = clusterNumPoints(C)
+clustStats.stdN = stdN;
+clustStats.CI = confInt;
 %%
 W = linkage_to_tree(T);
 root = W(end, 3);
 
-vals1 = 30:10:140;
-vals2 = 10:10:140;
+vals1 = 1:1:1;
+vals2 = 10:5:50;
 
 [bestLambda1, bestLambda2] = computeBestParams(root, X, W, ...
-    G, C, vals1, vals2);
-
+    G, C, vals1, vals2, epsilon);
 %%
-[~, ~, ~, ~, AltB] = exploreBFS(root, X, W, bestLambda1, bestLambda2);
+[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2, epsilon);
 lblsDynCut = labelsAfterDynCut(X, W, AltB);
-[ariScore, nmiScore] = compareClustering(G, C, lblsDynCut);
+[ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
 %%
 figure
 
@@ -99,14 +102,17 @@ gscatter(X(1,:), X(2,:), G); axis square; title('GroundTruth')
 subplot(1, 3, 2)
 gscatter(X(1,:), X(2,:), C); axis square; title('T linkage');
 
-
 subplot(1, 3, 3)
 gscatter(X(1,:), X(2,:), lblsDynCut); axis square; title('T linkage w/ Dynamic Cut');
 
 %%
 candidateOutliers = outliersNeighbour(X');
 lblsDynCut(candidateOutliers) = 0;
-%%
+[ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
+%% ARI & NMI SCORE COMPARISON
+ariScore
+nmiScore
+%% MISCLASSIFICATION ERROR COMPARISON
 % Find the misclassified points
 misclassified_pointsTLink = find(G ~= C);
 misclassified_pointsDynTLink = find(G ~= lblsDynCut);
@@ -119,21 +125,39 @@ misclassification_errorDynTLink = length(misclassified_pointsDynTLink) / length(
 disp(['Misclassification error T-Linkage: ' num2str(misclassification_errorTLink)]);
 disp(['Misclassification error Dynamic T-Linkage: ' num2str(misclassification_errorDynTLink)]);
 
+%% INLIER and OUTLIER RANGE
+inlierRange = 0.005:0.0075:0.2;
+outlierRange = 0:0.05:1;
 %% INLIER THRESHOLD COMPARISON
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 figure
-plot(0.01:0.015:0.2, smoothdata(misclassErr(:, 1)), "-", "LineWidth", 2, ...
+plot(inlierRange, misclassErr(:, 1), "-", "LineWidth", 2, ...
     "Marker", "o")
 hold on
-plot(0.01:0.015:0.2, smoothdata(misclassErr(:, 2)), "-", "LineWidth", 2, ...
+plot(inlierRange, misclassErr(:, 2), "-", "LineWidth", 2, ...
     "Marker", "+")
-lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
+lgd = legend("T-Linkage ME", "LOF Dynamic T-Linkage ME");
 lgd.FontSize = 15; % Change the font size to 14 points
-title("Comparison T-Linkage vs. Dynamic T-Linkage")
+title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
 xlabel("\epsilon", "FontSize", 16)
 ylabel("Misclassification Error", "FontSize", 14)
-
-%% OUTLIER PERCENTAGE COMPARISON
+ylim([0 0.8])
+%% OUTLIER THRESHOLD - PARAMETER LAMBDA
+figure
+plot(outlierRange, Outl2, "s-", "LineWidth", 2, "Color", "#0072BD")
+yline(mean(Outl2), "--", mean(Outl2), "LineWidth", 2.3, "Color", "#D95319", ...
+    "LabelVerticalAlignment", "Bottom", ...
+    "FontSize", 15)
+title("Variation of lambda parameter based on outlier %")
+xlabel("Outlier %", "FontSize", 16)
+ylabel("\lambda(Outlier %)", "FontSize", 16)
+legend("\lambda(Outlier %)", "FontSize", 16)
+ylim([0, 60])
+% hold on
+% p = polyfit(inlierRange(3:end), l2(3:end), 2);
+% yfit = polyval(p, inlierRange(3:end));
+% plot(inlierRange(3:end), yfit, "-", "LineWidth", 2, "Color", "#D95319")
+%% OUTLIER PERCENTAGE COMPARISON - ME
 figure
 plot(0:0.10:1, misclassErr(:, 1), "-", "LineWidth", 2, ...
     "Marker", "o")
@@ -146,20 +170,49 @@ title("Comparison T-Linkage vs. Dynamic T-Linkage")
 xlabel("Outlier %", "FontSize", 14)
 ylabel("Misclassification Error", "FontSize", 14)
 ylim([0, 0.4])
-%%
+
+%% OUTLIER PERCENTAGE COMPARISON - ME
 figure
-%load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
-v = 0.01:0.015:0.2;
-plot(v, smoothdata(ariScore(:, 1)), "--", "LineWidth", 2, "Color", "#D95319")
+plot(0:0.05:1, OutmisclassErr(:, 1), "-", "LineWidth", 2, ...
+    "Marker", "o")
 hold on
-plot(v, smoothdata(ariScore(:, 2)), "-", "LineWidth", 2, "Color", "#D95319")
-plot(v, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2, "Color", "#0072BD")
-plot(v, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2, "Color", "#0072BD")
-lgd = legend("ARI T-Linkage", "ARI Dyn T-Linkage", "NMI T-Linkage", "NMI Dyn T-Linkage");
+plot(0:0.05:1, OutmisclassErr(:, 2), "-", "LineWidth", 2, ...
+    "Marker", "+")
+lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
 lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. Dynamic T-Linkage")
+xlabel("Outlier %", "FontSize", 14)
+ylabel("Misclassification Error", "FontSize", 14)
+ylim([0, 0.5])
+%% OUTLIER PERCENTAGE COMPARISON - ARI & NMI
+figure
+%load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
+v = 0:0.05:1;
+plot(v, OutARIscore(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
+hold on
+plot(v, OutARIscore(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
+% plot(v, OutNMIscore(:, 1), "--", "LineWidth", 2, "Color", "#0072BD")
+% plot(v, OutNMIscore(:, 2), "-", "LineWidth", 2, "Color", "#0072BD")
+lgd = legend("T-Linkage ARI", "LOF Dynamic T-Linkage ARI");
+lgd.FontSize = 15; % Change the font size to 14 points
+title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
+xlabel("Outlier %", "FontSize", 16)
+ylabel("ARI", "FontSize", 14)
+ylim([0 1])
+%% INLIER THRESHOLD COMPARISON - ARI & NMI
+figure
+%load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
+v = 0.005:0.0075:0.2;
+plot(v, ARI(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
+hold on
+plot(v, ARI(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
+% plot(v, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2, "Color", "#0072BD")
+% plot(v, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2, "Color", "#0072BD")
+lgd = legend("T-Linkage ARI \times NMI", "LOF Dynamic T-Linkage ARI \times NMI");
+lgd.FontSize = 15; % Change the font size to 14 points
+title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
 xlabel("\epsilon", "FontSize", 16)
-ylabel("ARI & NMI", "FontSize", 14)
+ylabel("ARI \times NMI", "FontSize", 14)
 
 %% Reference
 % When using the code in your research work, please cite the following paper:

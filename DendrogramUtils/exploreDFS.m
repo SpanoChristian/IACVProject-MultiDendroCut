@@ -1,7 +1,7 @@
-function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambda1, lambda2)
-    
-    epsi = 2e-2; % inlier threhsold
-    sigma = epsi;
+function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambda1, lambda2, inlierThreshold)
+
+    %sigma = 0.85e-1;
+    sigma = inlierThreshold;
     OK = false(1, 0);
     gScoreBefore = [];
     gScoreAfter = [];
@@ -25,7 +25,6 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
 %     it = 1;
     
     while ~isempty(S)
-        
 %         disp("------- New Iteration -------")
         currNode = S(1);
         [childL, childR] = get_children(currNode, tree);
@@ -56,7 +55,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
 %             ["Complexity Before : " gComplexityBefore(end)]; ...
 %             ["Complexity After : " gComplexityAfter(end)]])
 %         
-%         disp(gScoreAfter(end) + " <= " + gScoreBefore(end) + " ?")
+%           disp([gScoreAfter(end) " <= " gScoreBefore(end) " ?"])
         
 %         subplot(1, 2, 1)
 %         plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
@@ -122,6 +121,6 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
 %     
 %     plot(idxAltB, gScoreAfter(idxAltB), "o", "MarkerSize", 7, "MarkerFaceColor", "g");
 %     legend("Gric before", "Gric after", "gAfter < gBefore")
- 
+
 end
 

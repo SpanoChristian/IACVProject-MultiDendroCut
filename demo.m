@@ -4,10 +4,11 @@ addpath(genpath('.'));
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
 
-% load './Dataset/Star5.mat';
-load './Dataset/JLinkageExamples.mat'
-X = Star11_S00075_O50;
-% X = Circles5_S00075_O50;
+% If the ground truth labels are provided: true
+% Otherwise: false
+labelled_data = false;
+
+[X,G, nTotPoints, nRealPoints, nOutliers] = getDatasetAndInfo(labelled_data, 7);
 
 N = size(X, 2);
 % In order to work with a specific model, T-Linkage needs to be given:
@@ -15,9 +16,6 @@ N = size(X, 2);
 % - hpFun: returns an estimate model given cardmss points
 % - fit_model: least square fitting function
 
-% If the ground truth labels are provided: true
-% Otherwise: false
-labelled_data = false;
 
 % In this example we want to estimate lines so distFun is the euclidean
 % distance between a point from a line in the plane and cardmss=2.

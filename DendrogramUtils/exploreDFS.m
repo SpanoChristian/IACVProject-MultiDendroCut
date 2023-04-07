@@ -1,4 +1,10 @@
 function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambda1, lambda2, inlierThreshold)
+%EXPLOREDFS explore tree through DFS approach, expanding node only if the
+% sum of cost of expanded children is smaller than the parent
+% Inputs
+%   C: root node
+%   X: points
+%   tree: matrix representation of the tree
 
     %sigma = 0.85e-1;
     sigma = inlierThreshold;
@@ -42,6 +48,11 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
         [newOk, gricScore, ~] = isMergeableGricLine(XLR, XL, XR, ...
             lambda1, lambda2, sigma);
         
+        %  - before: when clusters are not merged
+        %  - after: when clusters are merged
+        % we will split (expand) if after > before
+
+
         OK(end+1) = newOk;
         gScoreBefore(end+1) = gricScore.gric.before;
         gScoreAfter(end+1) = gricScore.gric.after;
@@ -49,6 +60,8 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
         gFidelityAfter(end+1) = gricScore.fidelity.after;
         gComplexityBefore(end+1) = gricScore.complexity.before;
         gComplexityAfter(end+1) = gricScore.complexity.after;
+
+ 
 %         
 %         disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
 %             ["Fidelity After : " gFidelityAfter(end)]; ...

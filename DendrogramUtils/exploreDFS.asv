@@ -6,12 +6,11 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(C, X, tree, lambd
 %   X: points
 %   tree: matrix representation of the tree
 % Outputs
-%   OK: list of actions suggested 
-%   gScoreBefore: list of grics of not merged cluster (for each copy of sibiling clusters not merged)
-%   gScoreAfter: list of grics of merged cluster on each cluster name (for each cluster obtained merging two sibilings)
-%   V: list visited nodes
-%   AltB: list of nodes that are better merged than splitted (based on name
-%   of the cluster)
+%   OK: list of actions suggested (for each copy of sibiling clusters)
+%   gScoreBefore: list of grics of not merged cluster (for each sibiling )
+%   gScoreAfter: list of grics of merged cluster on each cluster name
+%   V: list of actions suggested on each cluster name
+%   AltB: list of actions suggested on each cluster name
 
     %sigma = 0.85e-1;
     sigma = inlierThreshold;

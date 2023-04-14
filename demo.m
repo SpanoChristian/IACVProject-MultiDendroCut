@@ -65,7 +65,10 @@ P = prefMat(R, epsilon, 1);
 %different ways (T-Linkage is agonostic about the outlier rejection strategy),
 %for example discarding too small cluster, or exploiting the randomness of
 %a model.
-C  = outlier_rejection_card( C, cardmss );
+
+% uncomment only if we don't change resulting labels
+% C  = outlier_rejection_card( C, cardmss ); 
+
 % Outliers are labelled by '0'
 %% Showing results
 figure

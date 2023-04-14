@@ -4,7 +4,8 @@ addpath(genpath('.'));
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
 
-graphsFolder = "Graphs/";
+graphsFolderImgs = "Graphs/Images/";
+graphsFolderFigs = "Graphs/Figures/";
 
 epsilonRange = linspace(0.02, 0.25, 30);
 outlierRange = linspace(0, 1, 30);
@@ -23,7 +24,7 @@ for i=2:2
         G = generateGTLbls(nClusters, 50, nOutliers); %#ok<UNRCH>
     end
   
-    [misclassErr, ARI, NMI, ARINMI, lambda] = ...
+    [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
         inlierThresholdComparison(X, G, epsilonRange, model2fit);
 
     %% 
@@ -56,11 +57,12 @@ for i=2:2
     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage (" + datasetTitle + ")")
     xlabel("\epsilon", "FontSize", 16)
     ylabel("Misclassification Error", "FontSize", 14)
-    xlim([0.01, 0.27])
-    ylim([0 0.7])
+    roof = max([misclassErr(:, 1); misclassErr(:, 2); misclassErr(:, 3)]);
+    xlim([min(epsilonRange)-0.02, max(epsilonRange)+0.02])
+    ylim([0, roof+0.1])
 
-    saveas(gcf, graphsFolder + datasetTitle + "_MEComparison", 'png');
-    saveas(gcf, graphsFolder + datasetTitle + "_MEComparison");
+    saveas(gcf, graphsFolderImgs + datasetTitle + "_MEComparison", 'png');
+    saveas(gcf, graphsFolderFigs + datasetTitle + "_MEComparison");
   
     %% INLIER THRESHOLD - PARAMETER LAMBDA
     figure
@@ -72,11 +74,28 @@ for i=2:2
     xlabel("\epsilon", "FontSize", 16)
     ylabel("\lambda(\epsilon)", "FontSize", 16)
     legend("\lambda(\epsilon)", "FontSize", 16)
-    xlim([0.01, 0.27])
-    ylim([0, 60])
+    xlim([min(epsilonRange)-0.02, max(epsilonRange)+0.02])
+    ylim([0, max(lambda)+10])
    
-    saveas(gcf, graphsFolder + datasetTitle + "_LambdaVariation", 'png');
-    saveas(gcf, graphsFolder + datasetTitle + "_LambdaVariation");
+    saveas(gcf, graphsFolderImgs + datasetTitle + "_LambdaVariation", 'png');
+    saveas(gcf, graphsFolderFigs + datasetTitle + "_LambdaVariation");
+    
+    %% Improvement Comparison - How much our algorithm impact on ME?
+    
+    % LOF Dynamic T-Linkage vs T-Linkage
+    LOFDynVsTlnk = misclassErr(:, 1) - misclassErr(:, 3);
+    
+    % Dynamic T-Linkage vs T-Linkage
+    DynVsTlnk = misclassErr(:, 1) - misclassErr(:, 2);
+    
+    bar(epsilonRange, [LOFDynVsTlnk'; DynVsTlnk'])
+    legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
+    title("Improvement of [LOF] Dynamic T-Linkage", "FontSize", 15)
+    xlabel("\epsilon", "FontSize", 16)
+    ylabel("% ME Improved", "FontSize", 15)
+    
+    saveas(gcf, graphsFolderImgs + datasetTitle + "_ImprovementPerc", 'png');
+    saveas(gcf, graphsFolderFigs + datasetTitle + "_ImprovementPerc");
     %% INLIER THRESHOLD COMPARISON - ARI & NMI
 %     figure
 %     %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")

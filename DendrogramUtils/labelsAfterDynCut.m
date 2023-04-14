@@ -1,4 +1,4 @@
-function lbls = labelsAfterDynCut(X, tree, AltB)
+function lbls = labelsAfterDynCut(X, tree, AltB, clusterThreshold)
 %LABELSAFTERDYNCUT assign cluster to points
 % Inputs
 %   X: list of points
@@ -15,7 +15,7 @@ function lbls = labelsAfterDynCut(X, tree, AltB)
         idxAB = get_cluster_idxPoints(AltB(i), X, tree);
         P = get_cluster_points(X, idxAB);
         % With circles I used: 18
-        if length(P) > 25
+        if length(P) > clusterThreshold
             l = l + 1;
             lbls(idxAB) = l;
 %             medIdxAB = median(idxAB);

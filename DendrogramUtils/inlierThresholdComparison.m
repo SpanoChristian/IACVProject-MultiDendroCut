@@ -1,4 +1,4 @@
-function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
+function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
     inlierThresholdComparison(X, G, epsilonRange, model2fit)
 
     N = size(X, 2);
@@ -11,6 +11,7 @@ function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
     NMI = zeros(0, nModelsToCheck);
     ARINMI = zeros(0, nModelsToCheck);
     lambda = [];
+    thresholds = [];
     
     k = 1;
 
@@ -36,15 +37,34 @@ function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
 
         [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
             isMergeableGricModel, false);
- 
-        lblsDynCut = labelsAfterDynCut(X, W, AltB);
+        
+        
+% I WAS EVALUATING WHAT IS THE BEST "CLUSTER THRESHOLD" (the one used in 
+% 'labelsAfterDynCut'). Turns out that > 0 is the best -> some doubts about
+% this result. I already obtained something like this and I am not sure it
+% is correct... but we will see! ;)
+
+%         best = 1;
+%         bestThreshold = 20;
+%         lblsDynCutBest = [];
+%         for clusterThreshold = 0:2.5:40
+%             lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold);
+%             [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
+%             if best > ME(1, 2)
+%                 best = ME(1, 2);
+%                 bestThreshold = clusterThreshold;
+%                 lblsDynCutBest = lblsDynCut;
+%             end
+%         end
+%         
+%         thresholds(end+1) = bestThreshold;
         
         %[ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
         
         %MEbefore = ME(1, 2);
         
         
-        
+        lblsDynCut = labelsAfterDynCut(X, W, AltB, 0);
          % compare TLinkage and DynTLinkage
         [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
         %ME(:,1) ME T-Link

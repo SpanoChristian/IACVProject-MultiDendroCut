@@ -21,7 +21,7 @@ function bestLambda = computeBestParams(root, X, W, G, C, range, ...
         [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda, ...
             inlierThreshold, model2fit, false);
         
-        lbls = labelsAfterDynCut(X, W, AltB);
+        lbls = labelsAfterDynCut(X, W, AltB, 0);
         
         [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
         

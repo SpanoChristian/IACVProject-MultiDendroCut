@@ -6,7 +6,7 @@ addpath(genpath('.'));
 
 graphsFolder = "Graphs/";
 
-epsilonRange = linspace(0.02, 0.25, 30);
+epsilonRange = linspace(0.02, 0.25, 10);
 outlierRange = linspace(0, 1, 30);
 
 % If the ground truth labels are provided: true
@@ -23,7 +23,7 @@ for i=2:2
         G = generateGTLbls(nClusters, 50, nOutliers); %#ok<UNRCH>
     end
   
-    [misclassErr, ARI, NMI, ARINMI, lambda] = ...
+    [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
         inlierThresholdComparison(X, G, epsilonRange, model2fit);
 
     %% 
@@ -56,7 +56,7 @@ for i=2:2
     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage (" + datasetTitle + ")")
     xlabel("\epsilon", "FontSize", 16)
     ylabel("Misclassification Error", "FontSize", 14)
-    sxlim([])
+    xlim([0.01, 0.27])
     ylim([0 0.7])
 
     saveas(gcf, graphsFolder + datasetTitle + "_MEComparison", 'png');
@@ -72,10 +72,17 @@ for i=2:2
     xlabel("\epsilon", "FontSize", 16)
     ylabel("\lambda(\epsilon)", "FontSize", 16)
     legend("\lambda(\epsilon)", "FontSize", 16)
+    xlim([0.01, 0.27])
     ylim([0, 60])
    
     saveas(gcf, graphsFolder + datasetTitle + "_LambdaVariation", 'png');
     saveas(gcf, graphsFolder + datasetTitle + "_LambdaVariation");
+    
+    %% Improvement Comparison - How much our algorithm impact the ME?
+    y1 = misclassErr(:, 1) - misclassErr(:, 3);
+    y2 = misclassErr(:, 1) - misclassErr(:, 2);
+    bar(epsilonRange, [y1'; y2'])
+    
     %% INLIER THRESHOLD COMPARISON - ARI & NMI
 %     figure
 %     %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")

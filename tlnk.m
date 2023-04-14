@@ -102,12 +102,12 @@ pts100 = C(51:100);
 pts150 = C(101:150);
 pts200 = C(151:200);
 pts250 = C(201:250);
-pts300 = C(251:300);
-pts350 = C(301:350);
-pts400 = C(351:400);
-pts450 = C(401:450);
-pts500 = C(451:500);
-pts550 = C(501:550);
+% pts300 = C(251:300);
+% pts350 = C(301:350);
+% pts400 = C(351:400);
+% pts450 = C(401:450);
+% pts500 = C(451:500);
+% pts550 = C(501:550);
 
 [mode50, n50] = mode(pts50);
 %disp("Mode 1-50pts : " + mode50 + " - " + n50)
@@ -119,17 +119,17 @@ pts550 = C(501:550);
 %disp("Mode 151-200pts : " + mode200 + " - " + n200)
 [mode250, n250] = mode(pts250);
 %disp("Mode 201-250pts : " + mode250 + " - " + n250)
-[mode300, n300] = mode(pts300);
-%disp("Mode 251-300pts : " + mode300 + " - " + n300)
-[mode350, n350] = mode(pts350);
-%disp("Mode 301-350pts : " + mode350 + " - " + n350)
-[mode400, n400] = mode(pts400);
-%disp("Mode 351-400pts : " + mode400 + " - " + n400)
-[mode450, n450] = mode(pts450);
-%disp("Mode 401-450pts : " + mode450 + " - " + n450)
-[mode500, n500] = mode(pts500);
-%disp("Mode 451-500pts : " + mode500 + " - " + n500)
-[mode550, n550] = mode(pts550);
+% [mode300, n300] = mode(pts300);
+% %disp("Mode 251-300pts : " + mode300 + " - " + n300)
+% [mode350, n350] = mode(pts350);
+% %disp("Mode 301-350pts : " + mode350 + " - " + n350)
+% [mode400, n400] = mode(pts400);
+% %disp("Mode 351-400pts : " + mode400 + " - " + n400)
+% [mode450, n450] = mode(pts450);
+% %disp("Mode 401-450pts : " + mode450 + " - " + n450)
+% [mode500, n500] = mode(pts500);
+% %disp("Mode 451-500pts : " + mode500 + " - " + n500)
+% [mode550, n550] = mode(pts550);
 %disp("Mode 501-550pts : " + mode550 + " - " + n550)
 % 
 Cnew = zeros(n, 1);
@@ -138,11 +138,11 @@ Cnew(find(C == mode100)) = 2;
 Cnew(find(C == mode150)) = 3;
 Cnew(find(C == mode200)) = 4;
 Cnew(find(C == mode250)) = 5;
-Cnew(find(C == mode300)) = 6;
-Cnew(find(C == mode350)) = 7;
-Cnew(find(C == mode400)) = 8;
-Cnew(find(C == mode450)) = 9;
-Cnew(find(C == mode500)) = 10;
-Cnew(find(C == mode550)) = 11;
+% Cnew(find(C == mode300)) = 6;
+% Cnew(find(C == mode350)) = 7;
+% Cnew(find(C == mode400)) = 8;
+% Cnew(find(C == mode450)) = 9;
+% Cnew(find(C == mode500)) = 10;
+% Cnew(find(C == mode550)) = 11;
 
 C = Cnew;

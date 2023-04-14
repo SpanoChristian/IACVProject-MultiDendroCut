@@ -1,4 +1,4 @@
-function [misclassErr, ARIscore, NMIscore, ARINMIscore, l1, l2] = outlierRobustnessComparison(X, G)
+function [misclassErr, ARIscore, NMIscore, ARINMIscore, l1, l2] = outlierRobustnessComparison(X, G, numOutliers)
 
     misclassErr = zeros(0, 2);
     ARIscore = zeros(0, 2);
@@ -12,9 +12,8 @@ function [misclassErr, ARIscore, NMIscore, ARINMIscore, l1, l2] = outlierRobustn
     for outlier = 0:0.05:1
         tic
         
-        K = 550; % num outliers
-        m = outlier*K;
-        Xnew = X(:, 1:550+m);
+        m = outlier*numOutliers;
+        Xnew = X(:, 1:numOutliers+m);
         
         N = size(Xnew, 2);
         [distFun, hpFun, ~, cardmss] = set_model('line');
@@ -32,7 +31,7 @@ function [misclassErr, ARIscore, NMIscore, ARINMIscore, l1, l2] = outlierRobustn
         vals1 = 10:10:10;
         vals2 = 0:5:50;
         
-        Gnew = G(1:550+m);
+        Gnew = G(1:numOutliers+m);
 
         [bestLambda1, bestLambda2] = computeBestParams(root, Xnew, W, ...
             Gnew, C, vals1, vals2, epsilon);

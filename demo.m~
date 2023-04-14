@@ -4,10 +4,11 @@ addpath(genpath('.'));
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
 
-load './Dataset/Star5.mat';
-% load './Dataset/JLinkageExamples.mat'
-% X = Star5_S00075_O50;
-% X = Circles5_S00075_O50;
+% If the ground truth labels are provided: true
+% Otherwise: false
+labelled_data = false;
+
+[X,G, nTotPoints, nRealPoints, nOutliers] = getDatasetAndInfo(labelled_data, 2);
 
 N = size(X, 2);
 % In order to work with a specific model, T-Linkage needs to be given:
@@ -15,9 +16,6 @@ N = size(X, 2);
 % - hpFun: returns an estimate model given cardmss points
 % - fit_model: least square fitting function
 
-% If the ground truth labels are provided: true
-% Otherwise: false
-labelled_data = true;
 
 % In this example we want to estimate lines so distFun is the euclidean
 % distance between a point from a line in the plane and cardmss=2.
@@ -25,10 +23,10 @@ labelled_data = true;
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
 if ~labelled_data
-    G = generateGTLbls(5, 50, 250); %#ok<UNRCH>
+    G = generateGTLbls(11, 50, 550); %#ok<UNRCH>
 end
 
-[distFun, hpFun, fit_model, cardmss] = set_model('line');
+[distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 %% Conceptual representation of points
 
 %T-linkage starts, as Ransac with random sampling:
@@ -67,7 +65,10 @@ P = prefMat(R, epsilon, 1);
 %different ways (T-Linkage is agonostic about the outlier rejection strategy),
 %for example discarding too small cluster, or exploiting the randomness of
 %a model.
-C  = outlier_rejection_card( C, cardmss );
+
+% uncomment only if we don't change resulting labels
+% C  = outlier_rejection_card( C, cardmss ); 
+
 % Outliers are labelled by '0'
 %% Showing results
 figure
@@ -81,13 +82,13 @@ clustStats.CI = confInt;
 W = linkage_to_tree(T);
 root = W(end, 3);
 
-vals1 = 0.005:0.1:1;
-vals2 = 10:2.5:50;
+lambdaRange = 0:5:50;
 
-[bestLambda1, bestLambda2] = computeBestParams(root, X, W, ...
-    G, C, vals1, vals2, epsilon);
+bestLambda = computeBestParams(root, X, W, G, C, lambdaRange, ...
+    model2fit, epsilon);
 %%
-[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2, epsilon);
+[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
+    isMergeableGricModel, false);
 lblsDynCut = labelsAfterDynCut(X, W, AltB);
 [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
 %%
@@ -127,7 +128,7 @@ disp(['Misclassification error Dynamic T-Linkage: ' num2str(misclassification_er
 
 %% INLIER and OUTLIER RANGE
 inlierRange = 0.005:0.0075:0.2;
-outlierRange = 0;
+outlierRange = 0:0.05:1;
 %% INLIER THRESHOLD COMPARISON
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 figure
@@ -141,16 +142,18 @@ lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
 xlabel("\epsilon", "FontSize", 16)
 ylabel("Misclassification Error", "FontSize", 14)
-ylim([0 0.6])
-
-%% INLIER THRESHOLD - PARAMETER LAMBDA
+ylim([0 0.8])
+%% OUTLIER THRESHOLD - PARAMETER LAMBDA
 figure
-plot(inlierRange, l2, "s-", "LineWidth", 2, "Color", "#0072BD")
-title("Variation of lambda parameter")
-xlabel("\epsilon", "FontSize", 16)
-ylabel("\lambda(\epsilon)", "FontSize", 16)
-legend("\lambda(\epsilon)")
-ylim([])
+plot(outlierRange, Outl2, "s-", "LineWidth", 2, "Color", "#0072BD")
+yline(mean(Outl2), "--", mean(Outl2), "LineWidth", 2.3, "Color", "#D95319", ...
+    "LabelVerticalAlignment", "Bottom", ...
+    "FontSize", 15)
+title("Variation of lambda parameter based on outlier %")
+xlabel("Outlier %", "FontSize", 16)
+ylabel("\lambda(Outlier %)", "FontSize", 16)
+legend("\lambda(Outlier %)", "FontSize", 16)
+ylim([0, 60])
 % hold on
 % p = polyfit(inlierRange(3:end), l2(3:end), 2);
 % yfit = polyval(p, inlierRange(3:end));
@@ -181,7 +184,7 @@ lgd.FontSize = 15; % Change the font size to 14 points
 title("Comparison T-Linkage vs. Dynamic T-Linkage")
 xlabel("Outlier %", "FontSize", 14)
 ylabel("Misclassification Error", "FontSize", 14)
-ylim([0, 0.27])
+ylim([0, 0.5])
 %% OUTLIER PERCENTAGE COMPARISON - ARI & NMI
 figure
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
@@ -201,9 +204,9 @@ ylim([0 1])
 figure
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 v = 0.005:0.0075:0.2;
-plot(v, ARINMI(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
+plot(v, ARI(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
 hold on
-plot(v, ARINMI(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
+plot(v, ARI(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
 % plot(v, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2, "Color", "#0072BD")
 % plot(v, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2, "Color", "#0072BD")
 lgd = legend("T-Linkage ARI \times NMI", "LOF Dynamic T-Linkage ARI \times NMI");

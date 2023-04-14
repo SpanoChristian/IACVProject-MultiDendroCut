@@ -1,16 +1,14 @@
-function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
-    inlierThresholdComparison(X, G, epsilonRange, model2fit)
+function [misclassErr, ARI, NMI, ARINMI, lambda] = inlierThresholdComparison(X, G, epsilonRange)
 
     N = size(X, 2);
-    
-    [distFun, hpFun, ~, cardmss, isMergeableGricModel] = set_model(model2fit);
-    
+    [distFun, hpFun, ~, cardmss] = set_model('line');
     nModelsToCheck = 3;
     misclassErr = zeros(0, nModelsToCheck); % rows correspond to different values of epsilon
     ARI = zeros(0, nModelsToCheck);
     NMI = zeros(0, nModelsToCheck);
     ARINMI = zeros(0, nModelsToCheck);
-    lambda = [];
+    l1 = [];
+    l2 = [];
     
     k = 1;
 
@@ -27,16 +25,17 @@ function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
 
         lambdaRange = 0:5:50;
 
-        bestLambda = computeBestParams(root, X, W, ...
-            G, C, lambdaRange, isMergeableGricModel, epsilon);
+        [bestLambda1, bestLambda2] = computeBestParams(root, X, W, ...
+            G, C, lambdaRange, @isMergeableGricLine, epsilon);
+        computeBestParams(root, X, W, G, C, range, ...
+    model2fit, inlierThreshold)
         
-        lambda(end+1) = bestLambda;
+        l1(end+1) = bestLambda1;
+        l2(end+1) = bestLambda2;
         
         [~, meanN, stdN, confInt] = clusterNumPoints(C);
 
-        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
-            isMergeableGricModel, false);
- 
+        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2, epsilon);
         lblsDynCut = labelsAfterDynCut(X, W, AltB);
         
         %[ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
@@ -104,7 +103,6 @@ function [misclassErr, ARI, NMI, ARINMI, lambda] = ...
 %               ["LOF?      : " dispME]])
         
         k = k + 1;      
-        
     end
 end
 

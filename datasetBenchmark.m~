@@ -56,7 +56,7 @@ for i=2:2
     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage (" + datasetTitle + ")")
     xlabel("\epsilon", "FontSize", 16)
     ylabel("Misclassification Error", "FontSize", 14)
-    xlim([0.01, 0.27])
+    sxlim([])
     ylim([0 0.7])
 
     saveas(gcf, graphsFolder + datasetTitle + "_MEComparison", 'png');
@@ -72,7 +72,6 @@ for i=2:2
     xlabel("\epsilon", "FontSize", 16)
     ylabel("\lambda(\epsilon)", "FontSize", 16)
     legend("\lambda(\epsilon)", "FontSize", 16)
-    xlim([0.01, 0.27])
     ylim([0, 60])
    
     saveas(gcf, graphsFolder + datasetTitle + "_LambdaVariation", 'png');

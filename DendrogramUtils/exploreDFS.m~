@@ -19,7 +19,7 @@
 %           the name of the cluster)
 
 function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
-    tree, lambda, inlierThreshold, model2fit, verbose)
+    tree, lambda, inlierThreshold)
 
     sigma = inlierThreshold;
     OK = false(1, 0);
@@ -34,9 +34,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     V = [];                    % visited nodes
     S = root;                  % stack - init: root node
     
-    if verbose
-        figure
-    end
+%     figure
     
     while ~isempty(S)
 %         disp("------- New Iteration -------")
@@ -53,7 +51,8 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
           
-        [newOk, gricScore, ~] = model2fit(XLR, XL, XR, lambda, sigma);
+        [newOk, gricScore, ~] = isMergeableGricLine(XLR, XL, XR, lambda, ...
+            sigma);
         
         % before: when clusters are not merged
         % after: when clusters are merged
@@ -66,46 +65,45 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         gFidelityAfter(end+1) = gricScore.fidelity.after;
         gComplexityBefore(end+1) = gricScore.complexity.before;
         gComplexityAfter(end+1) = gricScore.complexity.after;
-        
-        if verbose
-            subplot(1, 2, 1)
-            plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
-            title("Joined Cluster")
-            xlim([-1 1])
-            ylim([-1 1])
-            axis square
 
-            subplot(1, 2, 2)
-            plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
-            title("Cluster split")
-            xlim([-1 1])
-            ylim([-1 1])
-            axis square
-            if size(XL, 2) >= 2
-                cXL = fitline(XL);
-            end
-            hold on
-            plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
-            axis square
-            if size(XR, 2) >= 2
-                cXR = fitline(XR);
-            end
-
-            drawLines(cXL, "--", "b")
-            drawnow;
-            drawLines(cXR, "--", "r")
-            drawnow;
-            legend("L Clust", "R Clust", "FitLine L", "Fitline R")
-            
-            hold off
-        end
-
+ 
+%         
 %         disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
-%                 ["Fidelity After : " gFidelityAfter(end)]; ...
-%                 ["Complexity Before : " gComplexityBefore(end)]; ...
-%                 ["Complexity After : " gComplexityAfter(end)]])
-%         disp([gScoreAfter(end) " <= " gScoreBefore(end) " ?"])
+%             ["Fidelity After : " gFidelityAfter(end)]; ...
+%             ["Complexity Before : " gComplexityBefore(end)]; ...
+%             ["Complexity After : " gComplexityAfter(end)]])
+%         
+%           disp([gScoreAfter(end) " <= " gScoreBefore(end) " ?"])
         
+%         subplot(1, 2, 1)
+%         plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
+%         title("Joined Cluster")
+%         xlim([-1 1])
+%         ylim([-1 1])
+%         axis square
+%         
+%         subplot(1, 2, 2)
+%         plot(XL(1, :), XL(2, :), "o", "MarkerFaceColor", "g")
+%         title("Cluster split")
+%         xlim([-1 1])
+%         ylim([-1 1])
+%         axis square
+%         if size(XL, 2) >= 2
+%             cXL = fitline(XL);
+%         end
+%         hold on
+%         plot(XR(1, :), XR(2, :), "o", "MarkerFaceColor", "r")
+%         axis square
+%         if size(XR, 2) >= 2
+%             cXR = fitline(XR);
+%         end
+%         
+%         drawLines(cXL, "--", "b")
+%         drawnow;
+%         drawLines(cXR, "--", "r")
+%         drawnow;
+%         legend("L Clust", "R Clust", "FitLine L", "Fitline R")   
+%         
         V = [V currNode];
         S(1) = [];
         
@@ -118,14 +116,22 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         elseif gScoreAfter(end) > gScoreBefore(end)
             S = [[childL childR] S];
         end
+% 
+%         hold off
         
     end
+    
+%     figure
+%     plot(gScoreBefore, "r-", "LineWidth", 1)
+%     hold on
+%     plot(gScoreAfter, "b--", "LineWidth", 1)
    
     % find all the clusters that are better if merged
     [~, idxAltB] = find(gScoreAfter < gScoreBefore);
-    
-    % return name of clusters that are better if merged
-    AltB = V(idxAltB);
+    AltB = V(idxAltB); % return name of clusters that are better if merged
+%     
+%     plot(idxAltB, gScoreAfter(idxAltB), "o", "MarkerSize", 7, "MarkerFaceColor", "g");
+%     legend("Gric before", "Gric after", "gAfter < gBefore")
 
 end
 

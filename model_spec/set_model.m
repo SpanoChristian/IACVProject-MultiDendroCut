@@ -1,4 +1,5 @@
-function [ distFun, hpFun, fit_model, cardmss   ] = set_model( model )
+function [ distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = ...
+    set_model( model )
 %SET_MODEL set the model specification: possible models are 'line', 'circle',
 % fundamental matrices ('fundamental') and 'subspace4'.
 %
@@ -17,11 +18,13 @@ switch model
         hpFun = @hpLines;
         fit_model = @fit_lines;
         cardmss = 2;
+        isMergeableGricModel = @isMergeableGricLine;
     case 'circle'
         distFun = @distPointCircle;
         hpFun = @hpCircles;
         fit_model = @fit_circle;
         cardmss = 3;
+        isMergeableGricModel = @isMergeableGricCircle;
     case 'fundamental'
         distFun = @distPointFm;
         hpFun = @hpFundamental;

@@ -8,7 +8,7 @@ addpath(genpath('.'));
 % Otherwise: false
 labelled_data = false;
 
-[X,G, nTotPoints, nRealPoints, nOutliers] = getDatasetAndInfo(labelled_data, 7);
+[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
 
 N = size(X, 2);
 % In order to work with a specific model, T-Linkage needs to be given:
@@ -23,10 +23,10 @@ N = size(X, 2);
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
 if ~labelled_data
-    G = generateGTLbls(11, 50, 550); %#ok<UNRCH>
+    G = generateGTLbls(nClusters, 50, nOutliers); %#ok<UNRCH>
 end
 
-[distFun, hpFun, fit_model, cardmss] = set_model('line');
+[distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 %% Conceptual representation of points
 
 %T-linkage starts, as Ransac with random sampling:
@@ -48,7 +48,7 @@ R = res(X, H, distFun);
 % preferences.
 % 
 
-epsilon = 0.095; % An inlier threshold value  epsilon has to be specified.
+epsilon = 0.25; % An inlier threshold value  epsilon has to be specified.
 P = prefMat(R, epsilon, 1);
 
 %% Clustering
@@ -82,13 +82,13 @@ clustStats.CI = confInt;
 W = linkage_to_tree(T);
 root = W(end, 3);
 
-vals1 = 1:1:1;
-vals2 = 10:5:50;
+lambdaRange = 0:5:50;
 
-[bestLambda1, bestLambda2] = computeBestParams(root, X, W, ...
-    G, C, vals1, vals2, epsilon);
+bestLambda = computeBestParams(root, X, W, G, C, lambdaRange, ...
+    isMergeableGricModel, epsilon);
 %%
-[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda1, bestLambda2, epsilon);
+[~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
+    isMergeableGricModel, false);
 lblsDynCut = labelsAfterDynCut(X, W, AltB);
 [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
 %%

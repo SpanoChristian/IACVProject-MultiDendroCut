@@ -1,5 +1,5 @@
 function [gScore, dataFidelity, modelComplexity] = getGricScore(rSqr, sigma, lambda1, lambda2)
-%GETGRICSCORE 
+%GETGRICSCORE the higher the worse
 
 n = numel(rSqr);
 % stdN = clustStats.stdN;

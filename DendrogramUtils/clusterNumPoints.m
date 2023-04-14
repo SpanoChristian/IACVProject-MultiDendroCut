@@ -1,5 +1,5 @@
 function [N, meanN, stdN, CI] = clusterNumPoints(labels)
-    lbls = unique(labels(labels ~= 0));
+    lbls = unique(labels(labels ~= 0)); % get all possible labels, except outlier one
     N = zeros(length(lbls), 1);
     
     for l = 1:length(lbls)

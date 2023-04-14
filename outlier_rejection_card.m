@@ -15,21 +15,21 @@ function [ C_new ] = outlier_rejection_card( C, cardmss )
 % luca (dot) magri (at) unimi (dot) it
 
 
-lbl = sort(unique(C));
-N = length(lbl);
+lbl = sort(unique(C)); %get all cluster labels
+N = length(lbl); %get number of clusters (outliers are a separate cluster)
 card = zeros(1, N);
-for l = 1:N
-    card(l) = sum(C == lbl(l));
+for l = 1:N %for each label
+    card(l) = sum(C == lbl(l)); %%see number of points belonging to that cluster
 end
 card = [card, cardmss]; % add a dummy mss
 
-lbl = [lbl; 0];
+lbl = [lbl; 0]; %zero appears twice
 [card_sorted, v] = sort(card, 'ascend');
 lbl_sorted = lbl(v);
 
 dHist = diff(card_sorted);
 
-[~, cut] = max(dHist);
+[~, cut] = max(dHist); % cut is the index of value which has greatest difference from following value
 C_new = C;
 
 if cut > 1

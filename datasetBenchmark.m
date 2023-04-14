@@ -58,8 +58,8 @@ for i=2:2
     xlabel("\epsilon", "FontSize", 16)
     ylabel("Misclassification Error", "FontSize", 14)
     roof = max([misclassErr(:, 1); misclassErr(:, 2); misclassErr(:, 3)]);
-    xlim([min(epsilonRange)-0.02, max(epsilonRange)+0.02])
-    ylim([0, roof+0.1])
+    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+    ylim([0, roof+0.15])
 
     saveas(gcf, graphsFolderImgs + datasetTitle + "_MEComparison", 'png');
     saveas(gcf, graphsFolderFigs + datasetTitle + "_MEComparison");
@@ -74,8 +74,8 @@ for i=2:2
     xlabel("\epsilon", "FontSize", 16)
     ylabel("\lambda(\epsilon)", "FontSize", 16)
     legend("\lambda(\epsilon)", "FontSize", 16)
-    xlim([min(epsilonRange)-0.02, max(epsilonRange)+0.02])
-    ylim([0, max(lambda)+10])
+    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+    ylim([0, max(lambda)+15])
    
     saveas(gcf, graphsFolderImgs + datasetTitle + "_LambdaVariation", 'png');
     saveas(gcf, graphsFolderFigs + datasetTitle + "_LambdaVariation");

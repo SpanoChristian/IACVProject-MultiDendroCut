@@ -4,6 +4,7 @@ addpath(genpath('.'));
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
 
+clusterSize = 50;
 % If the ground truth labels are provided: true
 % Otherwise: false
 labelled_data = false;
@@ -23,7 +24,7 @@ N = size(X, 2);
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
 if ~labelled_data
-    G = generateGTLbls(nClusters, 50, nOutliers); %#ok<UNRCH>
+    G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
 end
 
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
@@ -48,7 +49,7 @@ R = res(X, H, distFun);
 % preferences.
 % 
 
-epsilon = 0.25; % An inlier threshold value  epsilon has to be specified.
+epsilon = 0.085; % An inlier threshold value  epsilon has to be specified.
 P = prefMat(R, epsilon, 1);
 
 %% Clustering
@@ -67,13 +68,19 @@ P = prefMat(R, epsilon, 1);
 %a model.
 
 % uncomment only if we don't change resulting labels
-% C  = outlier_rejection_card( C, cardmss ); 
+C  = outlier_rejection_card( C, cardmss ); 
+
+
+Cnew = orderClusterLabels(C, clusterSize);
+
+% +1 because also outliers form a cluster
+Cnew = mod(Cnew, nClusters + 1); % true if the outliers are always the biggest cluster
 
 % Outliers are labelled by '0'
 %% Showing results
 figure
 subplot(1,2,1); gscatter(X(1,:),X(2,:), G); axis equal; title('GroundTruth'); legend off
-subplot(1,2,2); gscatter(X(1,:),X(2,:), C); axis equal; title('T linkage'); legend off
+subplot(1,2,2); gscatter(X(1,:),X(2,:), Cnew); axis equal; title('T linkage'); legend off
 %%
 [~, meanN, stdN, confInt] = clusterNumPoints(C)
 clustStats.stdN = stdN;
@@ -83,7 +90,6 @@ W = linkage_to_tree(T);
 root = W(end, 3);
 
 lambdaRange = 0:5:50;
-
 bestLambda = computeBestParams(root, X, W, G, C, lambdaRange, ...
     isMergeableGricModel, epsilon);
 %%

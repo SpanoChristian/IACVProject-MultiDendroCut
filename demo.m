@@ -5,6 +5,7 @@ addpath(genpath('.'));
 % segmentation
 
 clusterSize = 50;
+clusterThreshold = 0;
 % If the ground truth labels are provided: true
 % Otherwise: false
 labelled_data = false;
@@ -95,7 +96,7 @@ bestLambda = computeBestParams(root, X, W, G, C, lambdaRange, ...
 %%
 [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
     isMergeableGricModel, false);
-lblsDynCut = labelsAfterDynCut(X, W, AltB);
+lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold);
 [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
 %%
 figure
@@ -138,10 +139,10 @@ outlierRange = 0:0.05:1;
 %% INLIER THRESHOLD COMPARISON
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 figure
-plot(inlierRange, misclassErr(:, 1), "-", "LineWidth", 2, ...
+plot(inlierRange, misclassification_errorTLink, "-", "LineWidth", 2, ...
     "Marker", "o")
 hold on
-plot(inlierRange, misclassErr(:, 2), "-", "LineWidth", 2, ...
+plot(inlierRange, misclassification_errorDynTLink, "-", "LineWidth", 2, ...
     "Marker", "+")
 lgd = legend("T-Linkage ME", "LOF Dynamic T-Linkage ME");
 lgd.FontSize = 15; % Change the font size to 14 points
@@ -150,6 +151,7 @@ xlabel("\epsilon", "FontSize", 16)
 ylabel("Misclassification Error", "FontSize", 14)
 ylim([0 0.8])
 %% OUTLIER THRESHOLD - PARAMETER LAMBDA
+%{
 figure
 plot(outlierRange, Outl2, "s-", "LineWidth", 2, "Color", "#0072BD")
 yline(mean(Outl2), "--", mean(Outl2), "LineWidth", 2.3, "Color", "#D95319", ...
@@ -160,6 +162,7 @@ xlabel("Outlier %", "FontSize", 16)
 ylabel("\lambda(Outlier %)", "FontSize", 16)
 legend("\lambda(Outlier %)", "FontSize", 16)
 ylim([0, 60])
+
 % hold on
 % p = polyfit(inlierRange(3:end), l2(3:end), 2);
 % yfit = polyval(p, inlierRange(3:end));
@@ -206,13 +209,14 @@ title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
 xlabel("Outlier %", "FontSize", 16)
 ylabel("ARI", "FontSize", 14)
 ylim([0 1])
+%}
 %% INLIER THRESHOLD COMPARISON - ARI & NMI
 figure
 %load("./DendrogramUtils/Scores&Params_InlierThresholdComparison.mat")
 v = 0.005:0.0075:0.2;
-plot(v, ARI(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
+plot(v, ariScore(:, 1), "o--", "LineWidth", 2, "Color", "#D95319")
 hold on
-plot(v, ARI(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
+plot(v, ariScore(:, 2), "s-", "LineWidth", 2, "Color", "#0072BD")
 % plot(v, smoothdata(nmiScore(:, 1)), "--", "LineWidth", 2, "Color", "#0072BD")
 % plot(v, smoothdata(nmiScore(:, 2)), "-", "LineWidth", 2, "Color", "#0072BD")
 lgd = legend("T-Linkage ARI \times NMI", "LOF Dynamic T-Linkage ARI \times NMI");

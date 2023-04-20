@@ -1,5 +1,5 @@
 function bestLambda = computeBestParams(root, X, W, G, C, range, ...
-    model2fit, inlierThreshold)
+    model2fit, inlierThreshold, varargin)
     
 % ComputeBestParams: compute parameters that return the smallest clustering
 % error
@@ -21,7 +21,20 @@ function bestLambda = computeBestParams(root, X, W, G, C, range, ...
         [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda, ...
             inlierThreshold, model2fit, false);
         
-        lbls = labelsAfterDynCut(X, W, AltB, 0);
+        best = 1;
+        bestThreshold = 20;
+        lblsDynCutBest = [];
+        for clusterThreshold = 0:2.5:40
+            lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold);
+            [ME, ~, ~, ~] = compareClustering(G, C, lblsDynCut);
+            if best > ME(1, 2)
+                best = ME(1, 2);
+                bestThreshold = clusterThreshold;
+                lblsDynCutBest = lblsDynCut;
+            end
+        end
+        
+        lbls = labelsAfterDynCut(X, W, AltB, bestThreshold);
         
         [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
         

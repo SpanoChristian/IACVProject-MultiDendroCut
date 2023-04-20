@@ -23,7 +23,7 @@ N = size(X, 2);
 % fundamental matrices ('fundamental') and 'subspace4' (look in 'model_spec' folder).
 
 if ~labelled_data
-    G = generateGTLbls(nClusters, 50, nOutliers); %#ok<UNRCH>
+    G = generateGTLbls(nClusters, 50, 250); %#ok<UNRCH>
 end
 
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
@@ -48,7 +48,7 @@ R = res(X, H, distFun);
 % preferences.
 % 
 
-epsilon = 0.25; % An inlier threshold value  epsilon has to be specified.
+epsilon = 0.12; % An inlier threshold value  epsilon has to be specified.
 P = prefMat(R, epsilon, 1);
 
 %% Clustering
@@ -67,7 +67,10 @@ P = prefMat(R, epsilon, 1);
 %a model.
 
 % uncomment only if we don't change resulting labels
-% C  = outlier_rejection_card( C, cardmss ); 
+C  = outlier_rejection_card( C, cardmss );
+Cnew = orderClusterLabels(C, 50);
+% Cnew(Cnew == max(Cnew)) = 0;
+C = Cnew;
 
 % Outliers are labelled by '0'
 %% Showing results
@@ -89,7 +92,7 @@ bestLambda = computeBestParams(root, X, W, G, C, lambdaRange, ...
 %%
 [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
     isMergeableGricModel, false);
-lblsDynCut = labelsAfterDynCut(X, W, AltB);
+lblsDynCut = labelsAfterDynCut(X, W, AltB, 20);
 [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
 %%
 figure

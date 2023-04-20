@@ -11,6 +11,10 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
     thresholds = [];
     
     [distFun, hpFun, ~, cardmss, isMergeableGricModel] = set_model(model2fit);
+    S = mssUniform(Xnew, 5*N, cardmss);
+    H = hpFun(Xnew, S); 
+    R = res(Xnew, H, distFun);
+    P = prefMat(R, inlierThreshold, 1);
     
     k = 1;
 
@@ -21,37 +25,11 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
         Xnew = X(:, 1:numOutliers+m);
         
         N = size(Xnew, 2);
-        S = mssUniform(Xnew, 5*N, cardmss);
-        H = hpFun(Xnew, S); 
-        R = res(Xnew, H, distFun);
-        P = prefMat(R, inlierThreshold, 1);
         
         [C, T] = tlnk(P);
         C = outlier_rejection_card(C, cardmss);
-        
-        Cnew = orderClusterLabels(C, 50);
-        %Cnew(Cnew == max(Cnew)) = 0;  
+        Cnew = orderLbls(C, 50, 500); 
         C = Cnew;
-        
-        numOutliersFromTlnk = sum(C == 0)/length(C);
-        
-        h = 16*numOutliersFromTlnk;
-        f = 0.8 + 4.5*numOutliersFromTlnk;
-        g = (1 - 2.17)*numOutliersFromTlnk + 2.17;
-        %g = 0.985*(numOutliersFromTlnk - 1.2)^2 + 0.955;
-        
-        if numOutliersFromTlnk <= 0.15
-            adjNumOutliersFromTlnk = h * numOutliersFromTlnk;
-        elseif numOutliersFromTlnk > 0.15 && numOutliersFromTlnk <= 0.35
-            adjNumOutliersFromTlnk = f * numOutliersFromTlnk;
-        else
-            adjNumOutliersFromTlnk = g * numOutliersFromTlnk;
-        end
-        
-        fittedModel = -14.27*outlier.^2 + ...
-            34.05*outlier + 0.926;
-        
-        disp(["TLnk Outliers Est : " adjNumOutliersFromTlnk " vs. " outlier])
         
         W = linkage_to_tree(T);
         root = W(end, 3);
@@ -69,41 +47,7 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
         [~, ~, ~, ~, AltB] = exploreDFS(root, Xnew, W, bestLambda, ...
                  inlierThreshold, isMergeableGricModel, false);
         
-        %[~, meanN, stdN, confInt] = clusterNumPoints(C);
-        
-%         best = 1;
-%         bestThreshold = 0.085;
-%         for inlier = linspace(0.05, 0.2, 10)
-%             [~, ~, ~, ~, AltB] = exploreDFS(root, Xnew, W, bestLambda, ...
-%                 inlier, isMergeableGricModel, false);
-%             lblsDynCut = labelsAfterDynCut(Xnew, W, AltB, fittedModel);
-%             [ME, ~, ~, ~] = compareClustering(Gnew, C, lblsDynCut);
-%             if best > ME(1, 2)
-%                 best = ME(1, 2);
-%                 bestThreshold = inlier;
-%                 lblsDynCutBest = lblsDynCut;
-%             end
-%         end
-%         
-%         thresholds(end+1) = bestThreshold;
-%         
-%         best = 1;
-%         bestThreshold = 20;
-%         lblsDynCutBest = [];
-%         for clusterThreshold = 0:2.5:40
-%             lblsDynCut = labelsAfterDynCut(Xnew, W, AltB, clusterThreshold);
-%             [ME, ~, ~, ~] = compareClustering(Gnew, C, lblsDynCut);
-%             if best > ME(1, 2)
-%                 best = ME(1, 2);
-%                 bestThreshold = clusterThreshold;
-%                 lblsDynCutBest = lblsDynCut;
-%             end
-%         end
-%         
-%         thresholds(end+1) = bestThreshold;
-        
-%        disp(["Estimated Threshold : " fittedModel " vs. " bestThreshold])
-        
+             
         lblsDynCut = labelsAfterDynCut(Xnew, W, AltB, fittedModel);
         
         disp([["G length   : " length(Gnew)];

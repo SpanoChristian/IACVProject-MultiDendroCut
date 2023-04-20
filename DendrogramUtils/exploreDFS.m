@@ -39,14 +39,11 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     end
     
     while ~isempty(S)
-%         disp("------- New Iteration -------")
         currNode = S(1);
         [childL, childR] = get_children(currNode, tree);
        
-        idxL = get_cluster_idxPoints(childL, X, tree);
-        idxR = get_cluster_idxPoints(childR, X, tree);
-        XL = X(:, idxL);    % points in cluster corresponding to left node
-        XR = X(:, idxR);    % points in cluster corresponding to right node
+        [idxL, XL] = getClusterPoints(childL, X, tree);
+        [idxR, XR] = getClusterPoints(childR, X, tree);
         XLR = X(:, union(idxL, idxR));  % points in current cluster
         
 %         disp([[" XL size : " size(XL)]; [" XR size : " size(XR)]; ...
@@ -98,8 +95,10 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
             legend("L Clust", "R Clust", "FitLine L", "Fitline R")
             
             hold off
+            
+            pause(3)
         end
-
+% 
 %         disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
 %                 ["Fidelity After : " gFidelityAfter(end)]; ...
 %                 ["Complexity Before : " gComplexityBefore(end)]; ...

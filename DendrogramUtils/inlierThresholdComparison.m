@@ -3,8 +3,6 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
 
     N = size(X, 2);
     
-    [distFun, hpFun, ~, cardmss, isMergeableGricModel] = set_model(model2fit);
-    
     nModelsToCheck = 3;
     misclassErr = zeros(0, nModelsToCheck); % rows correspond to different values of epsilon
     ARI = zeros(0, nModelsToCheck);
@@ -13,27 +11,34 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
     lambda = [];
     thresholds = [];
     
+    [distFun, hpFun, ~, cardmss, isMergeableGricModel] = set_model(model2fit);
+    
+    S = mssUniform(X, 5*N, cardmss);
+    H = hpFun(X, S); 
+    R = res(X, H, distFun);
+    
     k = 1;
 
     for epsilon = epsilonRange
         tic
-        S = mssUniform(X, 5*N, cardmss);
-        H = hpFun(X, S); 
-        R = res(X, H, distFun);
+        
         P = prefMat(R, epsilon, 1);
         [C, T] = tlnk(P);
-        % C = outlier_rejection_card(C, cardmss);
+        C = outlier_rejection_card(C, cardmss);
+        Cnew = orderLbls(C, 50, 500);
+        C = Cnew;
+        
         W = linkage_to_tree(T);
         root = W(end, 3);
 
         lambdaRange = 0:5:50;
 
-        bestLambda = computeBestParams(root, X, W, ...
-            G, C, lambdaRange, isMergeableGricModel, epsilon);
+        bestLambda = 25; % computeBestParams(root, X, W, ...
+%             G, C, lambdaRange, isMergeableGricModel, epsilon);
         
         lambda(end+1) = bestLambda;
         
-        [~, meanN, stdN, confInt] = clusterNumPoints(C);
+        %[~, meanN, stdN, confInt] = clusterNumPoints(C);
 
         [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, bestLambda, epsilon, ...
             isMergeableGricModel, false);
@@ -64,7 +69,7 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
         %MEbefore = ME(1, 2);
         
         
-        lblsDynCut = labelsAfterDynCut(X, W, AltB, 0);
+        lblsDynCut = labelsAfterDynCut(X, W, AltB, 25, C);
          % compare TLinkage and DynTLinkage
         [ME, ariScore, nmiScore, arinmiScore] = compareClustering(G, C, lblsDynCut);
         %ME(:,1) ME T-Link
@@ -111,6 +116,12 @@ function [misclassErr, ARI, NMI, ARINMI, lambda, thresholds] = ...
 %         end
         
         
+        disp([["Epsilon   : " epsilon]; 
+             ["T-Linkage  : " misclassErr(end, 1)];
+             ["DYN T-link : " misclassErr(end, 2)];
+             ["LOFDYN T   : " misclassErr(end, 3)]])
+         
+        disp("AltB " + AltB)
         
         elapsed_time = toc;
         fprintf('Iteration %d took %f seconds\n', k, elapsed_time);

@@ -9,7 +9,7 @@
 % Output:
 %   - idxP: vector of indices of data points belonging to the cluster
 
-function idxP = get_cluster_idxPoints(C, X, tree)
+function [idxP, P] = getClusterPoints(C, X, tree)
     % Initialize the vector of cluster points to an empty array
     idxP = [];
     
@@ -30,19 +30,21 @@ function idxP = get_cluster_idxPoints(C, X, tree)
         % data point and recursively get the cluster points for the other child
         elseif childL <= n && childR > n
             idxP = [idxP childL];
-            idxP = [idxP get_cluster_idxPoints(childR, X, tree)];
+            idxP = [idxP getClusterPoints(childR, X, tree)];
         elseif childL > n && childR <= n
             idxP = [idxP childR];
-            idxP = [idxP get_cluster_idxPoints(childL, X, tree)];
+            idxP = [idxP getClusterPoints(childL, X, tree)];
 
         % If both children are clusters, recursively get the cluster points
         % for each child and add them to the cluster points
         else
-            idxP = [idxP get_cluster_idxPoints(childL, X, tree)];
-            idxP = [idxP get_cluster_idxPoints(childR, X, tree)];
+            idxP = [idxP getClusterPoints(childL, X, tree)];
+            idxP = [idxP getClusterPoints(childR, X, tree)];
         end
     else % If the cluster is a leaf, simply add it as a point
         idxP = [idxP C];
     end
+    
+    P = X(:, idxP);
     
 end

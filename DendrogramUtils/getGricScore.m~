@@ -11,9 +11,10 @@ n = numel(rSqr);
 %dataFidelity = sum(min(rSqr./sigma^2, 2));
 
 dataFidelity = min(mean(rSqr, 'omitnan'), 100);
-modelComplexity = 1/(exp(-(((n)/(lambda)))^(2)));
+%modelComplexity = 1/(exp(-(((n-lambda)/(60)))^(2)));
 %modelComplexity = 10/(exp(-(((n-lambda1)/(lambda2)))^(2))+(1/10));
 %modelComplexity = 0.1*(n - lambda)^2;
+modelComplexity = ;
 gScore = dataFidelity + modelComplexity;
 
 % disp([["Num Points : " n]; ...

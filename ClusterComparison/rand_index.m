@@ -8,6 +8,7 @@ function ri = rand_index(p1, p2, varargin)
 %   RAND_INDEX(p1, p2, 'adjusted') computes the adjusted rand index
 %   between partitions p1 and p2. The adjustment accounts for chance
 %   correlation.
+% The higher the Rand_index, the better
 
     %% Parse the input and throw errors
     % Check inputs

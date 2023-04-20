@@ -96,4 +96,4 @@ for j = 1:t
     end
 end
 
-[C, ~, ~] = grp2idx(C);
+[Cnew, ~, ~] = grp2idx(C);

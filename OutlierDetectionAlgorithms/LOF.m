@@ -1,4 +1,4 @@
-function outliers = outliersNeighbour(X)
+function outliers = LOF(X)
 
 % Define the number of neighbors to use in LOF calculation
 k = 40;

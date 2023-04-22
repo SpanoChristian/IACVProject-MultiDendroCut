@@ -2,9 +2,6 @@ function [X, G, numTotalPoints, numToClusterizePoints, numOutliers, numClusters,
 %GETDATASETINFO 
 %   If hasGroundTruth is false, then specify the dataset
 %   otherwise it will choose the only available with a ground truth
-% OUTPUT
-% numClusters: number of clusters to identify (excluding possible outliers
-% cluster)
     
     if ~hasGroundTruth
 

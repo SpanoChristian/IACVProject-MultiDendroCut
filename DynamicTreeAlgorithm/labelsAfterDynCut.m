@@ -12,8 +12,8 @@ function lbls = labelsAfterDynCut(X, tree, AltB, clusterThreshold)
     l = 0;
     
     for i = 1:sizeAltB
-        idxAB = get_cluster_idxPoints(AltB(i), X, tree)
-        P = get_cluster_points(X, idxAB)
+        idxAB = get_cluster_idxPoints(AltB(i), X, tree);
+        P = get_cluster_points(X, idxAB);
         % With circles I used: 18
         if length(P) > clusterThreshold
             l = l + 1;
@@ -22,15 +22,12 @@ function lbls = labelsAfterDynCut(X, tree, AltB, clusterThreshold)
     end
     
     %lbls = orderClusterLabels(lbls, 50);
-    C= [ 0 0 0 1 1 2 2 2 0 0 0 3 3 0 ]
 
-    for i = 1: length(C)
-        if C(i) == 0
-            C(i) = i + max(C);
+    for i = 1: length(lbls)
+        if lbls(i) == 0
+            lbls(i) = i + max(lbls);
             i=i+1;
         end
-
     end
-    C= [ 0 0 0 1 1 2 2 2 0 0 0 3 3 0 ]
 end
 

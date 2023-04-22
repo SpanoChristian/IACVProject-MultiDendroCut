@@ -1,4 +1,4 @@
-function [N, meanN, stdN, CI] = clusterNumPoints(labels)
+function [N, meanN, stdN, CI] = computeStatisticalMetrics(labels)
     lbls = unique(labels(labels ~= 0)); % get all possible labels, except outlier one
     N = zeros(length(lbls), 1);
     

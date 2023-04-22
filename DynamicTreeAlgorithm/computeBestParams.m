@@ -10,8 +10,10 @@ function bestLambda = computeBestParams(root, X, W, G, C, range, ...
 %   third)
 %   G: ground truth for each point
 %   C: assigned cluster by the algorithm
-%   vals1: possible values of param 
+%   range: possible values of lambda
+%   model2fit: %TODO
 %   inlierThreshold: not used in called functions
+
 
     ARI = zeros(length(range), 0);
     NMI = zeros(length(range), 0);
@@ -23,31 +25,14 @@ function bestLambda = computeBestParams(root, X, W, G, C, range, ...
 
         lbls = labelsAfterDynCut(X, W, AltB, 0);
         
-        [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
+        metrics = compareClustering(G, lbls);
         
-        misclassErr(end+1) = ME(2);
-        ARI(end+1) = ari(2);
-        NMI(end+1) = nmi(2);
+        misclassErr(end+1) = metrics.misclassErr;
+        ARI(end+1) = metrics.ariScore;
+        NMI(end+1) = metrics.nmiScore;
     end
     
     minME = min(misclassErr);
     idxMinME = find(misclassErr==minME);
     bestLambda = range(idxMinME(1));
-    
-%     maxNMI = max(max(NMI));
-%     [maxRow, maxCol] = find(NMI==maxNMI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
-%     
-%     maxARI = max(max(ARI));
-%     [maxRow, maxCol] = find(ARI==maxARI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
-% 
-%     ARINMI = ARI.*NMI;
-%     maxARINMI = max(max(ARINMI));
-%     [maxRow, maxCol] = find(ARINMI==maxARINMI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
 end
-

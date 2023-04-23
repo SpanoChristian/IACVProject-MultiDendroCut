@@ -5,12 +5,13 @@ addpath(genpath('.'));
 % Loading data: X contains data points, whereas G is the ground truth
 % segmentation
 
+plotBoundaries = 1.1;
 showGraphs = false;
 
 clusterSize = 50;
 clusterThreshold = 0;
 labelled_data = false;
-[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
+[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, ~] = getDatasetAndInfo(labelled_data, 4);
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 
 % move generateGTLbls into getDatasetAndInfo
@@ -18,11 +19,11 @@ labelled_data = false;
         G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
 end
 
-epsilonRange= linspace(0.02, 0.25, 30);
-%epsilonRange = 0.085; % An inlier threshold value  epsilon has to be specified.
-
+epsilonRange = linspace(0.02, 0.25, 15);
+epsilonRange = 0.085; % An inlier threshold value  epsilon has to be specified.
 
 outlierRange = 0:0.05:1; % TODO to use
+
 
 for i=1:length(epsilonRange)
     if length(epsilonRange) > 1
@@ -33,7 +34,10 @@ for i=1:length(epsilonRange)
     
     %% Perform T-Linkage
     [lblsTLinkage, T] = t_linkage(X, distFun, epsilon, cardmss, hpFun);
-    
+    tree = linkage_to_tree(T); %just for debugging
+    if length(epsilonRange) == 1
+        printBranches(tree, X, 999);
+    end
     %% Perform Dynamic T-Linkage
     lblsDynTLinkage = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
     
@@ -49,16 +53,15 @@ for i=1:length(epsilonRange)
     
     
     %% Order labels step
-    
-    lblsTLinkage = orderClusterLabels(lblsTLinkage, clusterSize);
-    lblsDynTLinkage = orderClusterLabels(lblsDynTLinkage, clusterSize);
+    %lblsTLinkage = orderClusterLabels(lblsTLinkage, clusterSize);
+    %lblsDynTLinkage = orderClusterLabels(lblsDynTLinkage, clusterSize);
     
     %% Showing results
-    if showGraphs
+    if length(epsilonRange) == 1
         figure('name','Assigned labels')
-        subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis equal; title('GroundTruth'); legend off
-        subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis equal; title('T linkage'); legend off
-        subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis equal; title('Dyn T linkage'); legend off
+        s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
+        s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
+        s = subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
     end
     
     %% Compare clustering
@@ -76,10 +79,10 @@ if length(epsilonRange) > 1
     finalTLinkageMetric = [metrics.tLinkage];
     finalDynTLinkageMetric = [metrics.dynTLinkage];
     figure('name','Ari')
-    plot(epsilonRange, [finalTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+    plot(epsilonRange, [finalTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
         "Marker", "o")
     hold on
-    plot(epsilonRange, [finalDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+    plot(epsilonRange, [finalDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
         "Marker", "+")
     lgd = legend("T-Linkage ARI", "Dynamic T-Linkage ARI");
     lgd.FontSize = 15; % Change the font size to 14 points

@@ -6,13 +6,27 @@ function printBranches(tree, X, root)
 %   tree: matrix describing tree
 %   X: leaf points of tree
 %   root: desired root for tree visualization
-    all_fig = findall(0, 'type', 'figure');
-    close(all_fig)
+
+    % Detect all figures - close the figures that are not the GUI
+    fh=findall(0,'type','figure');
+    nfh=length(fh); % Total number of open figures, including GUI and figures with visibility 'off'
+    % Scan through open figures - GUI figure number is [] (i.e. size is zero)
+    for i = 1:nfh 
+        if isempty(fh(i).Number) % checks if length(fh(i).Number) == 0
+            close(fh(i));
+        end
+    end
     
     [childL, childR] = get_children(root, tree);
     parent = get_node_parent(root, tree);
 
-    display("ChildL: " + childL +"; ChildR: " + childR);
+    if isempty(childR) || isempty(childL)
+        root = get_node_parent(root, tree);
+        [childL, childR] = get_children(root, tree);
+        parent = get_node_parent(root, tree);
+    end
+    
+    %display("ChildL: " + childL +"; ChildR: " + childR);
     clusterL = get_cluster_idxPoints(childL, X, tree);
     clusterR = get_cluster_idxPoints(childR, X, tree);
     cluster = [clusterL, clusterR];
@@ -20,7 +34,7 @@ function printBranches(tree, X, root)
     leftOut = leftOut(~ismember(leftOut, cluster));
 
     leftBranch = "Left Branch  (" + childL + ")";
-    rightBranch = "Left Branch  (" + childR + ")";
+    rightBranch = "Right Branch  (" + childR + ")";
     parentBranch = "Parent (" + parent + ")";
     
     treeFigure = uifigure; 
@@ -30,28 +44,27 @@ function printBranches(tree, X, root)
     ax = uiaxes(g);
     ax.Layout.Row = [1 2];
     ax.Layout.Column = [1 2];
-    legendText = "";
 
     if length(leftOut) > 0
-        plot(ax, X(1, leftOut), X(2, leftOut), "o", "MarkerFaceColor", "r", "DisplayName", "Not Belonging")
+        plot(ax, X(1, leftOut), X(2, leftOut), "o", "MarkerFaceColor", "r", "DisplayName", "Not Belonging");
         hold(ax, 'on');
     end
 
     if length(clusterR) > 0
-        plot(ax, X(1, clusterL), X(2, clusterL), "o", "MarkerFaceColor", "g", "DisplayName", "leftBranch")
+        plot(ax, X(1, clusterL), X(2, clusterL), "o", "MarkerFaceColor", "g", "DisplayName", "leftBranch");
         hold(ax, 'on');
     end
     if length(clusterR) > 0
-        plot(ax, X(1, clusterR), X(2, clusterR), "o", "MarkerFaceColor", "b", "DisplayName", "rightBranch")
+        plot(ax, X(1, clusterR), X(2, clusterR), "o", "MarkerFaceColor", "b", "DisplayName", "rightBranch");
         hold(ax, 'on');
     end
     
-    legend(ax, 'Location','bestoutside')
-    title(ax, "Points belonging to cluster " + root + " (blue)")
+    legend(ax, 'Location','bestoutside');
+    title(ax, "Points belonging to cluster " + root);
 
-    xlim(ax, [-1 1])
-    ylim(ax, [-1 1])
-    axis(ax, 'square')
+    xlim(ax, [-1 1]);
+    ylim(ax, [-1 1]);
+    axis(ax, 'square');
     
 
 

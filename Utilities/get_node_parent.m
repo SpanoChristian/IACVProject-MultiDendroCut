@@ -6,7 +6,7 @@ function [parent] = get_node_parent(node, tree)
     
     if sum(isLeftChild) == 1
         parent = tree(isLeftChild, 3);
-    else if sum(isRightChild) == 1
+    elseif sum(isRightChild) == 1
         parent = tree(isRightChild, 3);
     else
         treeSize = size(tree);

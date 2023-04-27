@@ -1,5 +1,5 @@
-function bestLambda = computeBestParams(root, X, W, G, C, range, ...
-    model2fit, inlierThreshold, varargin)
+function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range, ...
+    model2fit, inlierThreshold)
     
 % ComputeBestParams: compute parameters that return the smallest clustering
 % error
@@ -13,39 +13,56 @@ function bestLambda = computeBestParams(root, X, W, G, C, range, ...
 %   vals1: possible values of param 
 %   inlierThreshold: not used in called functions
 
-    ARI = zeros(length(range), 0);
-    NMI = zeros(length(range), 0);
-    misclassErr = zeros(length(range), 0);
+    ARI = zeros(0, 0);
+    NMI = zeros(0, 0);
+    misclassErr = zeros(0, 0);
     
-    for lambda = range
-        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda, ...
-            inlierThreshold, model2fit, false);
+    k = 1;
+    
+    for lambda1 = range
         
-        best = 1;
-        bestThreshold = 20;
-        lblsDynCutBest = [];
-        for clusterThreshold = 0:2.5:40
-            lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold);
-            [ME, ~, ~, ~] = compareClustering(G, C, lblsDynCut);
-            if best > ME(1, 2)
-                best = ME(1, 2);
-                bestThreshold = clusterThreshold;
-                lblsDynCutBest = lblsDynCut;
+        j = 1;
+        for lambda2 = range
+            [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda1, lambda2, ...
+                inlierThreshold, model2fit, false);
+
+            best = 1;
+            bestThreshold = 20;
+            lblsDynCutBest = [];
+            for clusterThreshold = 0:5:35
+                lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold, C);
+                [ME, ~, ~, ~] = compareClustering(G, C, lblsDynCut);
+                if best > ME(1, 2)
+                    best = ME(1, 2);
+                    bestThreshold = clusterThreshold;
+                    lblsDynCutBest = lblsDynCut;
+                end
             end
+            
+            lbls = labelsAfterDynCut(X, W, AltB, bestThreshold, C);
+
+            [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
+
+            misclassErr(k, j) = ME(2);
+            ARI(k, j) = ari(2);
+            NMI(k, j) = nmi(2);
+            
+            j = j + 1;
+        
         end
         
-        lbls = labelsAfterDynCut(X, W, AltB, bestThreshold);
-        
-        [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
-        
-        misclassErr(end+1) = ME(2);
-        ARI(end+1) = ari(2);
-        NMI(end+1) = nmi(2);
+        k = k + 1;  
+     
     end
     
-    minME = min(misclassErr);
-    idxMinME = find(misclassErr==minME);
-    bestLambda = range(idxMinME(1));
+    minME = min(min(misclassErr));                                                                                                                                   
+    [minRow, minCol] = find(misclassErr==minME);                                                                                                                     
+    bestLambda1 = range(minRow(1));                                                                                                                                  
+    bestLambda2 = range(minCol(1)); 
+    
+%     minME = min(misclassErr);
+%     idxMinME = find(misclassErr==minME);
+%     bestLambda = range(idxMinME(1));
     
 %     maxNMI = max(max(NMI));
 %     [maxRow, maxCol] = find(NMI==maxNMI);

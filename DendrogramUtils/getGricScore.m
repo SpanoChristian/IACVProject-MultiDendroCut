@@ -1,5 +1,5 @@
 function [gScore, dataFidelity, modelComplexity] = getGricScore(rSqr, ...
-    sigma, lambda)
+    sigma, lambda1, lambda2)
 %GETGRICSCORE the higher the worse
 
 n = numel(rSqr);
@@ -11,7 +11,7 @@ n = numel(rSqr);
 %dataFidelity = sum(min(rSqr./sigma^2, 2));
 
 dataFidelity = min(mean(rSqr, 'omitnan'), 100);
-modelComplexity = 1/(exp(-(((n)/(lambda)))^(2)));
+modelComplexity = 1/(exp(-(((n-lambda1)/(lambda2)))^(2)));
 %modelComplexity = 10/(exp(-(((n-lambda1)/(lambda2)))^(2))+(1/10));
 %modelComplexity = 0.1*(n - lambda)^2;
 gScore = dataFidelity + modelComplexity;

@@ -1,0 +1,135 @@
+
+PROJECT SELECTION AND DEVELOPMENT
+
+Please carefully follow the steps below:
+
+0) Form your project team. A project team can consist of one, two, or three students: 
+the total workload assigned will vary accordingly.
+
+1) Plan a starting date for your project work (if you are part of a team, 
+find an agreement with your team-mates on when to start).
+
+2) Select one of the proposed topics and, when you are ready to start, send an e-mail 
+both to the project supervisors and to prof. V.Caglioti in cc, including 
+(i) your preferred topic (or a list of topics in preference order),  
+(ii) the name of all the students in the team, and their e-mail address,
+(iii) your option between FULL project and SHORT project 
+
+PLEASE KEEP IN MIND THAT FOR A FULL PROJECT MARK IS UP TO 30/30 (cum laude), 
+WHILE FOR SHORT PROJECT THE MAXIMUM MARK IS 25/30.
+
+If the project is still available, it will be assigned to you(r team). 
+Otherwise, you will be asked to select an other topic.
+
+IMPORTANT: once the project has been assigned to your team, you have to start 
+working on it within 15 days. 
+After fifteen days have elapsed without starting the project, the assignment will be 
+cancelled and the project topic will be available again for assignment to other teams.  
+
+NOTE: of course you can contact the supervisor in this phase to ask for 
+preliminary information about the project, 
+but this is not sufficient have the project assigned: 
+to have a project assigned to you, you have to follow step 2.
+
+3) Then contact the project Supervisor, in order to exactly define the specification of your project. 
+The Supervisor is indicated after the title of each topic in the IACV 2022_2023 
+Project Topics file.
+
+4) During the project development you are warmly invited to interact frequently with the Supervisor, 
+with the Teacher, and with your colleagues, in order to identify good solution approaches: 
+this is not something you have to do on you own; on the contrary you are encouraged 
+to exchange ideas with people in order to produce the best possible result.
+
+5) Pay attention to both the delivery requirements and to the deadline (see next paragraphs)
+
+
+
+PROJECT DELIVERY: WHAT
+
+The project delivery for a FULL Project must include the following items:
+
+(i) The developed code (e.g. Matlab) with user instructions
+
+(ii) Experimental files: all what is needed to replicate experiments or 
+to compare your approach with subsequent approaches in future projects, including 
+    - input images or videos, 
+    - possible text files with additional information about 
+       acquisition conditions (e.g. camera intrisic parameters), 
+    - ground truth (e.g. true positions or identification or trajectory of observed objects), 
+    - intermediate results of your processing algorithm, 
+    - final results of your processing algorithm.
+
+(iii) A well-written self-sufficient pdf report including 
+    - the problem formulation (with a short motivation of its relevance), 
+    - a short outline of the state of the art, 
+    - your solution approach, 
+    - the description of your implementation, 
+    - the experimental activity and the analysis of experimental results, 
+    - final conclusions, also including some problems left open
+
+(iv) Slides for an oral presentation: same structure as the report structure
+
+
+The project delivery for a SHORT project must include the following items:
+
+(i) The developed code (e.g. Matlab) with user instructions
+
+(ii) Experimental files: all what is needed to replicate experiments or 
+to compare your approach with subsequent approaches in future projects, including 
+    - input images or videos, 
+    - possible text files with additional information about 
+       acquisition conditions (e.g. camera intrisic parameters), 
+    - ground truth (e.g. true positions or trajectory of observed objects), 
+    - intermediate results of your processing algorithm, 
+    - final results of your processing algorithm.
+
+(iii) Slides for an oral presentation: same structure as the report structure 
+(see delivery for Full Project, item (iii)) 
+
+
+PROJECT DELIVERY: WHERE
+
+All the above listed items must be compressed into a single zip file, 
+and the produced zip file must be named after 
+(i) the topic number and name, and (ii) the students' names. E.g., 
+08Waterpolo_Dirac_Fermi_Zhang, or 04CarSpeed_Pavlidis. 
+The zip file must be uploaded into the Project Delivery directory in the 
+Beep Platform space of the IACV course. 
+In addition, the project report (only for Full Project) and the slides presentation 
+(for both Full and Short project) must also be sent to Prof. Caglioti at vincenzo.caglioti@polimi.it
+
+
+PROJECT DELIVERY: WHEN 
+
+The dealine for project delivery is two days before date of the exam call, 
+when you wish to register the final mark.
+
+While planning project delivery time, please allow some time for the Supervisor 
+to read the project and possibly suggest you some needed modifications. 
+
+
+
+PROJECT EVALUATION
+
+Project evaluation will be based on four main aspects: 
+1) the scientific and technical quality of your contribution,
+2) the quality of the delivery (report, presentation, code, experimental files),
+3) self-organization and exploration capabilities (ability in solving practical issues, 
+such as finding or constructing suitable datasets, and in exploring the state-of-the-art in your topic)
+4) the quality of your coordination with the Supervisor (autonomy, capability of 
+elaborating the Supervisor's suggestions, efficacy in exposing your ideas)
+
+
+FINAL MARK: The IACV exam final mark will reusult from evaluating both the project and the theory-related 
+questions posed during the oral exam. In case of homework passed with good evaluation, 
+no theory-related quetions will be posed during the oral: therefore in this case the final mark will only 
+be based on the project evaluation.
+
+
+IMPORTANT NOTE: 
+
+many of the proposed project topics can be extended to Graduation Thesis (Tesi di laurea): 
+if interested, check with the Supervisor.
+
+
+ 

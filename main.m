@@ -1,3 +1,4 @@
+addpath(genpath('.'));
 %% Import Dataset & Useful Variables
 labelled_data = false;
 datasetID = 2;
@@ -29,27 +30,26 @@ C = outlier_rejection_card(C, cardmss);
 figure
 subplot(1,4,1); gscatter(X(1,:), X(2,:), G); axis square; title('Ground Truth'); legend off
 subplot(1,4,2); gscatter(X(1,:), X(2,:), C); axis square; title('T-Linkage'); legend off
-Cordered = orderClusterLabels(C, 50);
-[ls, ~] = orderLbls(C, 50, 500);
+%Cordered = orderClusterLabels(C, 50);
+[ls, ~] = orderLbls(C, 50, 400);
 subplot(1,4,3); gscatter(X(1,:), X(2,:), ls); axis square; title('T-Linkage New Order'); legend off
-subplot(1,4,4); gscatter(X(1,:), X(2,:), Cordered); axis square; title('T-Linkage Old Order'); legend off
+%subplot(1,4,4); gscatter(X(1,:), X(2,:), Cordered); axis square; title('T-Linkage Old Order'); legend off
 %% Performance's evaluation of T-Linkage
-[MEOld, ~, ~, ~] = compareClustering(G, C, Cordered)
+%[MEOld, ~, ~, ~] = compareClustering(G, C, Cordered)
 [MENew, ~, ~, ~] = compareClustering(G, C, ls)
 %%
 W = linkage_to_tree(T);
 root = W(end, 3);
 
-lambdaRange = 0:5:150;
+lambdaRange = 0:5:50;
 
-bestLambda = computeBestParams(root, X, W, G, ls, lambdaRange, ...
+[bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, ls, lambdaRange, ...
     isMergeableGricModel, epsilon);
-
-[~, ~, ~, ~, AltB] = exploreBFS(root, X, W, bestLambda, epsilon, ...
+%%
+[~, ~, ~, ~, AltB] = exploreBFS(root, X, W, bestLambda1, bestLambda2, epsilon, ...
     isMergeableGricModel, false);
-lblsDynCut = labelsAfterDynCut(X, W, AltB, 20, ls);
+lblsDynCut = labelsAfterDynCut(X, W, AltB, 19, ls);
 [ME, ~, ~, ~] = compareClustering(G, ls, lblsDynCut)
-
 %%
 %
 % bestME = 1;

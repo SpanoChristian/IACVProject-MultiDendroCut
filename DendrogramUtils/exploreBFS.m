@@ -18,8 +18,8 @@
 %   - AltB: list of nodes that are better merged than splitted (based on
 %           the name of the cluster)
 
-function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
-    tree, lambda, inlierThreshold, model2fit, verbose)
+function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreBFS(root, X, ...
+    tree, lambda1, lambda2, inlierThreshold, model2fit, verbose)
 
     sigma = inlierThreshold;
     OK = false(1, 0);
@@ -50,7 +50,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
           
-        [newOk, gricScore, ~] = model2fit(XLR, XL, XR, lambda, sigma);
+        [newOk, gricScore, ~] = model2fit(XLR, XL, XR, lambda1, lambda2, sigma);
         
         % before: when clusters are not merged
         % after: when clusters are merged

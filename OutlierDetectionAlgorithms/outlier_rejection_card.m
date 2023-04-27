@@ -34,9 +34,9 @@ C_new = C;
 
 if cut > 1
     if cut == length(dHist)
-        disp('we assume at least 2 models in the data')
         dHist(cut) = 0;
         [~, cut] = max(dHist);
+        %disp('we assume at least 2 models in the data')
     end
     lbl_out = lbl_sorted(1:cut);
     for j = 1:cut

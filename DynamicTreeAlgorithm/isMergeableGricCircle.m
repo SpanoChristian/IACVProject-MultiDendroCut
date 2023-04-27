@@ -1,4 +1,8 @@
-function [ok, msScore, msOutput] = isMergeableGricCircle(X, XL, XR, lambda1, lambda2, sigma)
+<<<<<<< HEAD:DendrogramUtils/isMergeableGricLine.m
+function [ok, msScore, msOutput] = isMergeableGricLine(X, XL, XR, lambda1, lambda2, sigma)
+=======
+function [ok, msScore, msOutput] = isMergeableGricCircle(X, XL, XR, lambda1, sigma, totalNumPoints)
+>>>>>>> origin/comments:DynamicTreeAlgorithm/isMergeableGricCircle.m
 % Check if two clusters A and B can be merged.
 % The test performs the following steps:
 % i) a model i on the first cluster is computed
@@ -70,13 +74,22 @@ if(nargin < 6)
 end
 %% compute gric score
 % gric score before the merge (the sum of gric on individual models)
+<<<<<<< HEAD:DendrogramUtils/isMergeableGricLine.m
 [gi, dfi, mci]  = getGricScore(rSqri, sigma, lambda1, lambda2);
 [gj, dfj, mcj] = getGricScore(rSqrj, sigma, lambda1, lambda2);
+=======
+[gi, dfi, mci]  = getGricScore(rSqri, sigma, lambda1);
+[gj, dfj, mcj] = getGricScore(rSqrj, sigma, lambda1);
+>>>>>>> origin/comments:DynamicTreeAlgorithm/isMergeableGricCircle.m
 gBefore = gi + gj;
 dfBefore = dfi + dfj;
 mcBefore = mci + mcj;
 % gric score after the merge
+<<<<<<< HEAD:DendrogramUtils/isMergeableGricLine.m
 [gAfter, dfAfter, mcAfter]  = getGricScore(rSqrij, sigma, lambda1, lambda2);
+=======
+[gAfter, dfAfter, mcAfter]  = getGricScore(rSqrij, sigma, lambda1);
+>>>>>>> origin/comments:DynamicTreeAlgorithm/isMergeableGricCircle.m
 %% compare gric score
 ok = gAfter < gBefore;
 %% package result

@@ -10,9 +10,11 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
 %   third)
 %   G: ground truth for each point
 %   C: assigned cluster by the algorithm
-%   vals1: possible values of param 
+%   range: possible values of lambda
+%   model2fit: %TODO
 %   inlierThreshold: not used in called functions
 
+<<<<<<< HEAD:DendrogramUtils/computeBestParams.m
     ARI = zeros(0, 0);
     NMI = zeros(0, 0);
     misclassErr = zeros(0, 0);
@@ -81,3 +83,27 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
 %     bestLambda2 = vals2(maxCol(1));
 end
 
+=======
+
+    ARI = zeros(length(range), 0);
+    NMI = zeros(length(range), 0);
+    misclassErr = zeros(length(range), 0);
+    
+    for lambda = range
+        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda, ...
+            inlierThreshold, model2fit, false);
+
+        lbls = labelsAfterDynCut(X, W, AltB, 0);
+        
+        metrics = compareClustering(G, lbls);
+        
+        misclassErr(end+1) = metrics.misclassErr;
+        ARI(end+1) = metrics.ariScore;
+        NMI(end+1) = metrics.nmiScore;
+    end
+    
+    minME = min(misclassErr);
+    idxMinME = find(misclassErr==minME);
+    bestLambda = range(idxMinME(1));
+end
+>>>>>>> origin/comments:DynamicTreeAlgorithm/computeBestParams.m

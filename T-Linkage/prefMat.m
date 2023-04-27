@@ -27,26 +27,26 @@ P=zeros(n,m);
 %set cutoff value
 if nargin==2
     r=1;
-    disp('Exponential voting is used')
+    %disp('Exponential voting is used')
 end
 
 switch r
     case 0
-        disp('Hard voting')
+        %disp('Hard voting')
         I=R<epsilon;
         P(I) = 1;
     case 1
-        disp('Exponential voting')
+        %disp('Exponential voting')
         tau=epsilon/5;
         I=R<epsilon;
         P(I) = exp(-R(I)./tau);
     case 2
-        disp('Gaussian voting')
+        %disp('Gaussian voting')
         sigma=epsilon/4;
         I=R<epsilon;
         P(I) = exp(-(R(I).^2)./(sigma^2));
     case 3
-        disp('Tukey voting')
+        %disp('Tukey voting')
         I=R<epsilon;
         P(I) = 1-tukey(R(I),epsilon);
 end

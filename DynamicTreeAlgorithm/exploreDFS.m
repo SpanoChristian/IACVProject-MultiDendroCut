@@ -21,6 +21,8 @@
 function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     tree, lambda1, lambda2, inlierThreshold, model2fit, verbose)
 
+    totalNumPoints = size(X, 2);
+
     sigma = inlierThreshold;
     OK = false(1, 0);
     gScoreBefore = [];
@@ -49,20 +51,30 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %         disp([[" XL size : " size(XL)]; [" XR size : " size(XR)]; ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
+<<<<<<< HEAD:DendrogramUtils/exploreDFS.m
           
         [newOk, gricScore, ~] = model2fit(XLR, XL, XR, lambda1, lambda2, sigma);
         
+=======
+
+
+        [newOk, gricScore] = model2fit(XLR, XL, XR, lambda, totalNumPoints);
+    
+>>>>>>> origin/comments:DynamicTreeAlgorithm/exploreDFS.m
         % before: when clusters are not merged
         % after: when clusters are merged
         % we will split (expand) if after < before
-
+    
         OK(end+1) = newOk;
         gScoreBefore(end+1) = gricScore.gric.before;
         gScoreAfter(end+1) = gricScore.gric.after;
-        gFidelityBefore(end+1) = gricScore.fidelity.before;
-        gFidelityAfter(end+1) = gricScore.fidelity.after;
-        gComplexityBefore(end+1) = gricScore.complexity.before;
-        gComplexityAfter(end+1) = gricScore.complexity.after;
+        %{
+            gFidelityBefore(end+1) = gricScore.fidelity.before;
+            gFidelityAfter(end+1) = gricScore.fidelity.after;
+            gComplexityBefore(end+1) = gricScore.complexity.before;
+            gComplexityAfter(end+1) = gricScore.complexity.after;
+        %}
+        
         
         if verbose
             subplot(1, 2, 1)
@@ -127,4 +139,3 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     AltB = V(idxAltB);
 
 end
-

@@ -51,16 +51,9 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %         disp([[" XL size : " size(XL)]; [" XR size : " size(XR)]; ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
-<<<<<<< HEAD:DendrogramUtils/exploreDFS.m
-          
-        [newOk, gricScore, ~] = model2fit(XLR, XL, XR, lambda1, lambda2, sigma);
-        
-=======
 
-
-        [newOk, gricScore] = model2fit(XLR, XL, XR, lambda, totalNumPoints);
+        [newOk, gricScore] = model2fit(XLR, XL, XR, lambda1, lambda2, totalNumPoints);
     
->>>>>>> origin/comments:DynamicTreeAlgorithm/exploreDFS.m
         % before: when clusters are not merged
         % after: when clusters are merged
         % we will split (expand) if after < before

@@ -1,4 +1,4 @@
-function [lblsDynCut] = dynamicTLinkage(X, T, G, labelsTLinkage, ...
+function [lblsDynCut, bestLambda1, bestLambda2] = dynamicTLinkage(X, T, G, labelsTLinkage, ...
     epsilon, isMergeableGricModel, clusterThreshold)
 %DYNAMICTLINKAGE Summary of this function goes here
 %   Detailed explanation goes here
@@ -24,14 +24,14 @@ function [lblsDynCut] = dynamicTLinkage(X, T, G, labelsTLinkage, ...
     root = tree(end, 3);
     
     lambdaRange = 0:5:50;
-    bestLambda = computeBestParams(root, X, tree, G, labelsTLinkage, lambdaRange, ...
+    [bestLambda1, bestLambda2]= computeBestParams(root, X, tree, G, labelsTLinkage, lambdaRange, ...
         isMergeableGricModel, epsilon);
-    
+
     
     %%
-    [~, ~, ~, ~, toMergeClusters] = exploreDFS(root, X, tree, bestLambda, epsilon, ...
+    [~, ~, ~, ~, toMergeClusters] = exploreDFS(root, X, tree, bestLambda1, bestLambda2, epsilon, ...
         isMergeableGricModel, false);
-    toMergeClusters = sort(toMergeClusters, "descend")
+    toMergeClustersOrdered = sort(toMergeClusters, "descend") %debug purpose
     lblsDynCut = labelsAfterDynCut(X, tree, toMergeClusters, clusterThreshold);
 end
 

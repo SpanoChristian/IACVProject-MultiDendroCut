@@ -14,7 +14,6 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
 %   model2fit: %TODO
 %   inlierThreshold: not used in called functions
 
-<<<<<<< HEAD:DendrogramUtils/computeBestParams.m
     ARI = zeros(0, 0);
     NMI = zeros(0, 0);
     misclassErr = zeros(0, 0);
@@ -32,10 +31,12 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
             bestThreshold = 20;
             lblsDynCutBest = [];
             for clusterThreshold = 0:5:35
+                
                 lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold, C);
-                [ME, ~, ~, ~] = compareClustering(G, C, lblsDynCut);
-                if best > ME(1, 2)
-                    best = ME(1, 2);
+                metricsDynTLinkage = compareClustering(G, lblsDynCut);
+
+                if best > metricsDynTLinkage.misclassErr
+                    best = metricsDynTLinkage.misclassErr;
                     bestThreshold = clusterThreshold;
                     lblsDynCutBest = lblsDynCut;
                 end
@@ -43,11 +44,11 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
             
             lbls = labelsAfterDynCut(X, W, AltB, bestThreshold, C);
 
-            [ME, ari, nmi, ~] = compareClustering(G, C, lbls);
+            metricsDynTLinkage = compareClustering(G, lblsDynCut);
 
-            misclassErr(k, j) = ME(2);
-            ARI(k, j) = ari(2);
-            NMI(k, j) = nmi(2);
+            misclassErr(k, j) = metricsDynTLinkage.misclassErr;
+            ARI(k, j) = metricsDynTLinkage.ariScore;
+            NMI(k, j) = metricsDynTLinkage.nmiScore;
             
             j = j + 1;
         
@@ -61,49 +62,4 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
     [minRow, minCol] = find(misclassErr==minME);                                                                                                                     
     bestLambda1 = range(minRow(1));                                                                                                                                  
     bestLambda2 = range(minCol(1)); 
-    
-%     minME = min(misclassErr);
-%     idxMinME = find(misclassErr==minME);
-%     bestLambda = range(idxMinME(1));
-    
-%     maxNMI = max(max(NMI));
-%     [maxRow, maxCol] = find(NMI==maxNMI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
-%     
-%     maxARI = max(max(ARI));
-%     [maxRow, maxCol] = find(ARI==maxARI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
-% 
-%     ARINMI = ARI.*NMI;
-%     maxARINMI = max(max(ARINMI));
-%     [maxRow, maxCol] = find(ARINMI==maxARINMI);
-%     bestLambda1 = vals1(maxRow(1));
-%     bestLambda2 = vals2(maxCol(1));
 end
-
-=======
-
-    ARI = zeros(length(range), 0);
-    NMI = zeros(length(range), 0);
-    misclassErr = zeros(length(range), 0);
-    
-    for lambda = range
-        [~, ~, ~, ~, AltB] = exploreDFS(root, X, W, lambda, ...
-            inlierThreshold, model2fit, false);
-
-        lbls = labelsAfterDynCut(X, W, AltB, 0);
-        
-        metrics = compareClustering(G, lbls);
-        
-        misclassErr(end+1) = metrics.misclassErr;
-        ARI(end+1) = metrics.ariScore;
-        NMI(end+1) = metrics.nmiScore;
-    end
-    
-    minME = min(misclassErr);
-    idxMinME = find(misclassErr==minME);
-    bestLambda = range(idxMinME(1));
-end
->>>>>>> origin/comments:DynamicTreeAlgorithm/computeBestParams.m

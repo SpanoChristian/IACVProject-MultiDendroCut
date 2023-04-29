@@ -1,4 +1,4 @@
-function [ok, msScore] = isMergeableGricLine(XLR, XL, XR, lambda, totalNumPoints)
+function [ok, msScore] = isMergeableGricLine(XLR, XL, XR, lambda1, lambda2, totalNumPoints)
 % Check if two clusters A and B can be merged.
 % The test performs the following steps:
 % i) a model i on the first cluster is computed
@@ -30,6 +30,8 @@ function [ok, msScore] = isMergeableGricLine(XLR, XL, XR, lambda, totalNumPoints
 %%------------------------------------------------------------
 
     %% precomputations
+
+    fakeSigma = 10;
     
     % consider points in cluster Ci, in cluster Cj and in the union Ci U Cj
     Xi = XL;
@@ -39,11 +41,11 @@ function [ok, msScore] = isMergeableGricLine(XLR, XL, XR, lambda, totalNumPoints
     
     %% compute gric score
     % gric score before the merge (the sum of gric on individual models)
-    gi = getGricScore(Xi, lambda, totalNumPoints);
-    gj = getGricScore(Xj, lambda, totalNumPoints);
+    gi = getGricScore(Xi, fakeSigma, lambda1, lambda2, totalNumPoints);
+    gj = getGricScore(Xj, fakeSigma, lambda1, lambda2, totalNumPoints);
     gBefore = gi + gj;
     % gric score after the merge
-    gAfter  = getGricScore(Xij, lambda, totalNumPoints);
+    gAfter  = getGricScore(Xij, fakeSigma, lambda1, lambda2, totalNumPoints);
     %% compare gric score
     ok = gAfter < gBefore;
     %% package result

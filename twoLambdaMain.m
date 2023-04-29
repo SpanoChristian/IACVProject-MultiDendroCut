@@ -1,5 +1,5 @@
 function [misclassErr, ARI, NMI, ARINMI, lambda1, lambda2, thresholds] = ...
-    inlierVariationNew(X, G, epsilonRange, model2fit)
+    twoLambdaMain(X, G, epsilonRange, model2fit)
 
 labelled_data = false;
 
@@ -23,6 +23,8 @@ R = res(X, H, distFun);
 thresholds = [];
 
 for epsilon = epsilonRange
+
+	% TODO use tLinkage and dynTLinkage functions
     tic
     
     P = prefMat(R, epsilon, 1);
@@ -37,7 +39,7 @@ for epsilon = epsilonRange
 
     lambdaRange = 0:5:80;
 
-    [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, lambdaRange, ...
+    [lambda1, lambda2] = computeBestParams(root, X, W, G, C, lambdaRange, ...
         isMergeableGricModel, epsilon);
     
     lambda1(end+1) = bestLambda1;

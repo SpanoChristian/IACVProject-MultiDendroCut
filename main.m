@@ -15,17 +15,18 @@ labelled_data = false;
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 
 % move generateGTLbls into getDatasetAndInfo
- if ~labelled_data
-        G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
+if ~labelled_data
+    G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
 end
 
-epsilonRange = linspace(0.02, 0.25, 2);
-epsilonRange = 0.085; % An inlier threshold value  epsilon has to be specified.
+epsilonRange = linspace(0.02, 0.25, 10);
+%epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
 
 outlierRange = 0:0.05:1; % TODO to use
 
 lambda1 = [];
 lambda2 = [];
+bestThresholds = [];
 
 for i=1:length(epsilonRange)
     
@@ -43,12 +44,11 @@ for i=1:length(epsilonRange)
     end
 
     %% Perform Dynamic T-Linkage
-    [lblsDynTLinkage, bestLambda1, bestLambda2]  = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
+    [lblsDynTLinkage, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
 
-
-   
     lambda1(end + 1) = bestLambda1;
     lambda2(end + 1) = bestLambda2;
+    bestThresholds(end + 1) = bestThreshold;
 
     %% Outlier rejection step
     
@@ -83,7 +83,6 @@ for i=1:length(epsilonRange)
     metrics(i).tLinkage = tLinkageMetrics;
     metrics(i).dynTLinkage = dynTLinkageMetrics;
     
-
 end
 
 
@@ -105,6 +104,21 @@ if length(epsilonRange) > 1
     ylabel("ARI", "FontSize", 14)
     ylim([0 0.8])
 
+    %% INLIER ARI COMPARISON
+    finalTLinkageMetric = [metrics.tLinkage];
+    finalDynTLinkageMetric = [metrics.dynTLinkage];
+    figure('name','Misclassification Error')
+    plot(epsilonRange, [finalTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+        "Marker", "o")
+    hold on
+    plot(epsilonRange, [finalDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+        "Marker", "+")
+    lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME");
+    lgd.FontSize = 15; % Change the font size to 14 points
+    title("Comparison T-Linkage vs. LOF Dynamic T-Linkage")
+    xlabel("\epsilon", "FontSize", 16)
+    ylabel("Misclassification Error %", "FontSize", 14)
+    ylim([0 0.8])
 
     %% INLIER THRESHOLD - PARAMETER LAMBDA 1
     figure

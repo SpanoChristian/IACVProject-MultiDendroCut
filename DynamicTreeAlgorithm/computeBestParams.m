@@ -1,4 +1,4 @@
-function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range, ...
+function [bestLambda1, bestLambda2, minClusterThreshold] = computeBestParams(root, X, W, G, C, range, ...
     model2fit, inlierThreshold)
     
 % ComputeBestParams: compute parameters that return the smallest clustering
@@ -17,6 +17,9 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
     ARI = zeros(0, 0);
     NMI = zeros(0, 0);
     misclassErr = zeros(0, 0);
+    bestClusterThresholds = zeros(0, 0);
+    
+    hw = waitbar(0, 'Computing best parameters...');
     
     k = 1;
     
@@ -30,7 +33,7 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
             best = 1;
             bestThreshold = 20;
             lblsDynCutBest = [];
-            for clusterThreshold = 0:5:35
+            for clusterThreshold = 0:5:50
                 
                 lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold, C);
                 metricsDynTLinkage = compareClustering(G, lblsDynCut);
@@ -43,23 +46,37 @@ function [bestLambda1, bestLambda2] = computeBestParams(root, X, W, G, C, range,
             end
             
             lbls = labelsAfterDynCut(X, W, AltB, bestThreshold, C);
+            
+            bestThreshold = -463.9973*inlierThreshold^2 + 239.1132*inlierThreshold + 7.6761;
+            lblsEst = labelsAfterDynCut(X, W, AltB, bestThreshold, C);
 
-            metricsDynTLinkage = compareClustering(G, lblsDynCut);
-
+            metricsDynTLinkage = compareClustering(G, lbls);
+            metricsDynTLinkageEst = compareClustering(G, lblsEst);
+            
+            bestClusterThresholds(k, j) = bestThreshold;
             misclassErr(k, j) = metricsDynTLinkage.misclassErr;
             ARI(k, j) = metricsDynTLinkage.ariScore;
             NMI(k, j) = metricsDynTLinkage.nmiScore;
+            
+            disp([["Best ME      : " misclassErr(k, j)];
+                  ["Estimated ME : " metricsDynTLinkageEst.misclassErr]])
             
             j = j + 1;
         
         end
         
-        k = k + 1;  
+        k = k + 1;
+        
+        waitbar(k/length(range), hw);
      
     end
+    
+    close(hw);
     
     minME = min(min(misclassErr));                                                                                                                                   
     [minRow, minCol] = find(misclassErr==minME);                                                                                                                     
     bestLambda1 = range(minRow(1));                                                                                                                                  
     bestLambda2 = range(minCol(1)); 
+    
+    minClusterThreshold = bestClusterThresholds(minRow(1), minCol(1));
 end

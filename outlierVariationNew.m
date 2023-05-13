@@ -29,7 +29,7 @@ function [misclassErr, ARI, NMI, ARINMI, lambda1, lambda2, thresholds] = ...
         if ~labelled_data
             G = generateGTLbls(nClusters, 50, i-250); %#ok<UNRCH>
         end
-        
+                
         S = mssUniform(X, 5*N, cardmss);
         H = hpFun(X, S); 
         R = res(X, H, distFun);
@@ -93,44 +93,4 @@ function [misclassErr, ARI, NMI, ARINMI, lambda1, lambda2, thresholds] = ...
 
         disp(k)
     end
-
-    %% OUTLIER THRESHOLD ME COMPARISON
-    figure
-    plot(outlierRange, misclassErr(:, 1), "-", "LineWidth", 2, ...
-        "Marker", "o", "Color", "#0072BD")
-    hold on
-    plot(outlierRange, misclassErr(:, 2), "-", "LineWidth", 2, ...
-        "Marker", "+", "Color", "#D95319")
-    hold on
-    plot(outlierRange, misclassErr(:, 3), "-", "LineWidth", 2, ...
-        "Marker", "*", "Color", "#EDB120")
-    lgd = legend("T-Linkage ME", "Dynamic T-Linkage ME", "LOF Dynamic T-Linkage ME");
-    lgd.FontSize = 15; % Change the font size to 14 points
-    title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage (" + datasetTitle + ")")
-    xlabel("Outlier %", "FontSize", 16)
-    ylabel("Misclassification Error", "FontSize", 14)
-    roof = max([misclassErr(:, 1); misclassErr(:, 2); misclassErr(:, 3)]);
-    xlim([min(outlierRange)-0.005, max(outlierRange)+0.005])
-    ylim([0, roof+0.15])
-
-%     saveas(gcf, graphsFolderImgsOutlier + datasetTitle + "_MEComparison", 'png');
-%     saveas(gcf, graphsFolderFigsOutlier + datasetTitle + "_MEComparison");
-% 
-    %%
-    % LOF Dynamic T-Linkage vs T-Linkage
-    LOFDynVsTlnk = misclassErr(:, 1) - misclassErr(:, 3);
-
-    % Dynamic T-Linkage vs T-Linkage
-    DynVsTlnk = misclassErr(:, 1) - misclassErr(:, 2);
-
-    figure
-    bar(outlierRange, [LOFDynVsTlnk'; DynVsTlnk'])
-    legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
-    title("Improvement of [LOF] Dynamic T-Linkage", "FontSize", 15)
-    xlabel("Outlier %", "FontSize", 16)
-    ylabel("% ME Improved", "FontSize", 15)
-% 
-%     saveas(gcf, graphsFolderImgsOutlier + datasetTitle + "_ImprovementPerc", 'png');
-%     saveas(gcf, graphsFolderFigsOutlier + datasetTitle + "_ImprovementPerc");
-
 end

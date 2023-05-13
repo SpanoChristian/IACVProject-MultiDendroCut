@@ -1,4 +1,4 @@
-function [lblsDynCut, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage(X, T, G, labelsTLinkage, ...
+function [lblsDynCut, bestLambda1, bestLambda2, bestThreshold, toMergeClusters] = dynamicTLinkage(X, T, G, labelsTLinkage, ...
     epsilon, isMergeableGricModel, clusterThreshold)
 %DYNAMICTLINKAGE Summary of this function goes here
 %   Detailed explanation goes here
@@ -23,7 +23,7 @@ function [lblsDynCut, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage
     tree = linkage_to_tree(T);
     root = tree(end, 3);
     
-    lambdaRange = 0:5:40;
+    lambdaRange = 0:5:60;
     [bestLambda1, bestLambda2, bestThreshold] = computeBestParams(root, X, tree, G, labelsTLinkage, lambdaRange, ...
         isMergeableGricModel, epsilon);
     

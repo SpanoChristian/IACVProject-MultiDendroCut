@@ -21,56 +21,84 @@ labelled_data = false;
 
 gscatter(X(1, :), X(2, :), G)
 
-% move generateGTLbls into getDatasetAndInfo
-if ~labelled_data
-    G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
-end
-
-epsilonRange = linspace(0.02, 0.25, 10);
+epsilonRange = linspace(0.01, 0.25, 10);
 %epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
 
-outlierRange = linspace(250, 500, 10); % TODO to use
+outlierRange = linspace(nTotPoints-nRealPoints, nTotPoints, 10); % TODO to use
 
-lambda1 = [];
-lambda2 = [];
 bestThresholds = [];
+
+idxOutlier = 1;
+
+outlierLen = length(outlierRange);
+epsilonLen = length(epsilonRange);
+
+tLinkageME = zeros(outlierLen, epsilonLen);
+dynTLinkageME = zeros(outlierLen, epsilonLen);
+lofDynTLinkageME = zeros(outlierLen, epsilonLen);
+bestClusterThresholdsLambda = zeros(outlierLen, epsilonLen);
+bestClusterThresholdsInlier = zeros(outlierLen, epsilonLen);
+lambda1 = zeros(outlierLen, epsilonLen);;
+lambda2 = zeros(outlierLen, epsilonLen);;
+
 
 for outlier = floor(outlierRange)
     
-    [X, G, ~, ~, ~, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
+    disp("Outlier Iteration " + idxOutlier + " of " + outlierLen)
+    
+    [X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
     X = X(:, 1:outlier);
     
+    N = size(X, 2);
+    
     if ~labelled_data
-        G = generateGTLbls(nClusters, 50, i-250); %#ok<UNRCH>
+        G = generateGTLbls(nClusters, 50, outlier-250); %#ok<UNRCH>
     end
     
     S = mssUniform(X, 5*N, cardmss);
     H = hpFun(X, S); 
     R = res(X, H, distFun);
     
-    for eps=1:length(epsilonRange)
+    for idxEps = 1:length(epsilonRange)
+
+        if length(epsilonRange) > 1
+            display("Inlier threshold variation " + idxEps + " out of " + length(epsilonRange))
+        end
+
+        epsilon = epsilonRange(idxEps);
         
         P = prefMat(R, epsilon, 1);
 
-        if length(epsilonRange) > 1
-            display("Inlier threshold variation " + eps + " out of " + length(epsilonRange))
-        end
-
-        epsilon = epsilonRange(eps);
-
         %% Perform T-Linkage
-        [lblsTLinkage, T] = t_linkage(X, distFun, epsilon, cardmss, hpFun);
+        [lblsTLinkage, T] = tlnk(P);
+        
         tree = linkage_to_tree(T); %just for debugging
         if length(epsilonRange) == -1
             printBranches(tree, X, 999);
         end
 
         %% Perform Dynamic T-Linkage
-        [lblsDynTLinkage, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
+        [lblsDynTLinkage, bestLambda1, bestLambda2, bestThresholdLambda] = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
+        
+        best = 1;
+        bestThresholdInlier = 20;
+        lblsDynCutBest = [];
+        for clusterThreshold = 0:5:40
 
-        lambda1(end + 1) = bestLambda1;
-        lambda2(end + 1) = bestLambda2;
-        bestThresholds(end + 1) = bestThreshold;
+            lblsDynCut = labelsAfterDynCut(X, W, AltB, clusterThreshold, C);
+            metricsDynTLinkage = compareClustering(G, lblsDynCut);
+
+            if best > metricsDynTLinkage.misclassErr
+                best = metricsDynTLinkage.misclassErr;
+                bestThresholdInlier = clusterThreshold;
+                lblsDynCutBest = lblsDynCut;
+            end
+        end
+        
+        lambda1(idxOutlier, idxEps) = bestLambda1;
+        lambda2(idxOutlier, idxEps) = bestLambda2;
+        bestThresholdsLambda(idxOutlier, idxEps) = bestThresholdLambda;
+        bestClusterThresholdsInlier(idxOutlier, idxEps) = bestThresholdInlier;
 
         %% Outlier rejection step
 
@@ -102,14 +130,35 @@ for outlier = floor(outlierRange)
         tLinkageMetrics = compareClustering(G, lblsTLinkage);
         dynTLinkageMetrics = compareClustering(G, lblsDynTLinkage);
         LOFdynTLinkageMetrics = compareClustering(G, lblsLOFDynCut);
-
-        metrics(eps).tLinkage = tLinkageMetrics;
-        metrics(eps).dynTLinkage = dynTLinkageMetrics;
-        metrics(eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
+        
+        tLinkageME(idxOutlier, idxEps) = tLinkageMetrics.misclassErr;
+        dynTLinkageME(idxOutlier, idxEps) = dynTLinkageMetrics.misclassErr;
+        lofDynTLinkageME(idxOutlier, idxEps) = LOFdynTLinkageMetrics.misclassErr;
+        
+        %metrics(idxOutlier, eps).tLinkage = tLinkageMetrics;
+        %metrics(idxOutlier, eps).dynTLinkage = dynTLinkageMetrics;
+        %metrics(idxOutlier, eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
     end
     
-end  
+    idxOutlier = idxOutlier + 1;
+    
+end  % End-For outlier variation
 
+% x = cols = epsilon
+% y = rows = outliers
+outlierRange = ((outlierRange-250)/250);
+figure
+surface(epsilonRange, outlierRange, tLinkageME, 'FaceColor', "#0072BD")
+hold on
+surface(epsilonRange, outlierRange, dynTLinkageME, 'FaceColor', "#D95319")
+surface(epsilonRange, outlierRange, lofDynTLinkageME, 'FaceColor', "#EDB120")
+ylabel("Outliers")
+xlabel("\epsilon")
+zlabel("ME(outlier, \epsilon)")
+title("ME based on outlier and inlier threshold")
+legend("T-Link", "Dyn T-Link", "LOF Dyn T-Link")
+
+hold off
 
 %% Different parameter comparisons
 if length(epsilonRange) > 1

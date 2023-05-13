@@ -53,6 +53,12 @@ function [X, G, numTotalPoints, numToClusterizePoints, numOutliers, numClusters,
                 numToClusterizePoints = 550;    
                 numClusters = 11;
                 title ="Star11_S00075_O50";
+            case 8
+                X = Circles5_S00075_O50;
+                numTotalPoints = 500;
+                numToClusterizePoints = 250;    
+                numClusters = 5;
+                title ="Circles5_S00075_O50";
         end
         numOutliers = numTotalPoints - numToClusterizePoints;
         G = generateGTLbls(numClusters, 50, numOutliers); %#ok<UNRCH>

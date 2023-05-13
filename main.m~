@@ -12,21 +12,20 @@ graphsFolderImgsInlier = "Graphs/Images/InlierVariation/";
 graphsFolderFigsInlier = "Graphs/Figures/InlierVariation/";
 graphsFolderImgsOutlier = "Graphs/Images/OutlierVariation/";
 graphsFolderFigsOutlier = "Graphs/Figures/OutlierVariation/";
+dataset
 
 clusterSize = 50;
 clusterThreshold = 25;
 labelled_data = false;
-[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
+[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
-
-gscatter(X(1, :), X(2, :), G)
 
 % move generateGTLbls into getDatasetAndInfo
 if ~labelled_data
     G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
 end
 
-epsilonRange = linspace(0.02, 0.25, 10);
+epsilonRange = linspace(0.02, 0.25, 2);
 %epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
 
 %outlierRange = 0:0.05:1; % TODO to use
@@ -114,9 +113,6 @@ if length(epsilonRange) > 1
     xlabel("\epsilon", "FontSize", 16)
     ylabel("ARI", "FontSize", 14)
     ylim([0 0.8])
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ARI", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ARI");
-
 
     %% MISCLASS ERROR
     figure('name','Misclassification Error')
@@ -133,9 +129,6 @@ if length(epsilonRange) > 1
     xlabel("\epsilon", "FontSize", 16)
     ylabel("Misclassification Error %", "FontSize", 14)
     ylim([0 0.8])
-    %%%%%%%%%%%%%%%%%%%%%%% HERE
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ME", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ME");
 
     %% INLIER THRESHOLD - PARAMETER LAMBDA 1
     figure

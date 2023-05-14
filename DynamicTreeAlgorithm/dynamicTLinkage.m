@@ -30,7 +30,7 @@ function [lblsDynCut, bestLambda1, bestLambda2, bestThreshold, toMergeClusters] 
     %%
     [~, ~, ~, ~, toMergeClusters] = exploreDFS(root, X, tree, bestLambda1, bestLambda2, epsilon, ...
         isMergeableGricModel, false);
-    toMergeClustersOrdered = sort(toMergeClusters, "descend") %debug purpose
+    toMergeClustersOrdered = sort(toMergeClusters, "descend"); %debug purpose
     lblsDynCut = labelsAfterDynCut(X, tree, toMergeClusters, bestThreshold);
 end
 

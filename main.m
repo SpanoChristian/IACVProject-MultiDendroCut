@@ -19,7 +19,7 @@ labelled_data = false;
 [X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 
-gscatter(X(1, :), X(2, :), G)
+%gscatter(X(1, :), X(2, :), G)
 
 % move generateGTLbls into getDatasetAndInfo
 if ~labelled_data
@@ -27,28 +27,28 @@ if ~labelled_data
 end
 
 epsilonRange = linspace(0.02, 0.25, 10);
-%epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
+epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
 
 outlierRange = linspace(250, 500, 10); % TODO to use
 
 lambda1 = [];
 lambda2 = [];
 bestThresholds = [];
+outlierIdx = 1;
 
 for outlier = floor(outlierRange)
-    
+    display(outlierIdx + ": " + outlier + " points")
     [X, G, ~, ~, ~, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
     X = X(:, 1:outlier);
+    G = G(1:outlier);
     
-    if ~labelled_data
-        G = generateGTLbls(nClusters, 50, i-250); %#ok<UNRCH>
-    end
-    
-    S = mssUniform(X, 5*N, cardmss);
+    S = mssUniform(X, 5*nRealPoints, cardmss);
     H = hpFun(X, S); 
     R = res(X, H, distFun);
     
     for eps=1:length(epsilonRange)
+        
+        epsilon = epsilonRange(eps);
         
         P = prefMat(R, epsilon, 1);
 
@@ -56,7 +56,6 @@ for outlier = floor(outlierRange)
             display("Inlier threshold variation " + eps + " out of " + length(epsilonRange))
         end
 
-        epsilon = epsilonRange(eps);
 
         %% Perform T-Linkage
         [lblsTLinkage, T] = t_linkage(X, distFun, epsilon, cardmss, hpFun);
@@ -91,7 +90,7 @@ for outlier = floor(outlierRange)
         lblsLOFDynCut = lblsDynTLinkage;
         lblsLOFDynCut(candidateOutliers) = 0;
         %% Showing results
-        if length(epsilonRange) == 1
+        if length(epsilonRange) == 1 && length(outlierRange) == 1
             figure('name','Assigned labels')
             s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
             s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
@@ -103,88 +102,110 @@ for outlier = floor(outlierRange)
         dynTLinkageMetrics = compareClustering(G, lblsDynTLinkage);
         LOFdynTLinkageMetrics = compareClustering(G, lblsLOFDynCut);
 
-        metrics(eps).tLinkage = tLinkageMetrics;
-        metrics(eps).dynTLinkage = dynTLinkageMetrics;
-        metrics(eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
+        metrics(outlierIdx, eps).tLinkage = tLinkageMetrics;
+        metrics(outlierIdx, eps).dynTLinkage = dynTLinkageMetrics;
+        metrics(outlierIdx, eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
     end
     
+    outlierIdx = outlierIdx + 1;
 end  
 
 
+xPlotRange =[];
+xLabelValue = "";
+
 %% Different parameter comparisons
-if length(epsilonRange) > 1
-    finalTLinkageMetric = [metrics.tLinkage];
-    finalDynTLinkageMetric = [metrics.dynTLinkage];
-    finalLOFDynTLinkageMetric = [metrics.LOFdynTLinkage];
+if length(epsilonRange) > 1 || length(outlierRange) > 1
+    if length(epsilonRange) > 1
+        xPlotRange = epsilonRange;
+        xLabelValue = "\epsilon";
+        titleBasedOn = xLabelValue;
+        finalTLinkageMetric = [metrics(1, :).tLinkage];
+        finalDynTLinkageMetric = [metrics(1, :).dynTLinkage];
+        finalLOFDynTLinkageMetric = [metrics(1, :).LOFdynTLinkage];
+        imageFolder = graphsFolderImgsInlier;
+        figureFolder = graphsFolderFigsInlier
+    else
+        xPlotRange = (outlierRange - nRealPoints)/ nRealPoints * 100;
+        xLabelValue = "Outliers / real points [%]";
+        titleBasedOn = "outlier presence";
+        finalTLinkageMetric = [metrics(:, 1).tLinkage];
+        finalDynTLinkageMetric = [metrics(:, 1).dynTLinkage];
+        finalLOFDynTLinkageMetric = [metrics(:, 1).LOFdynTLinkage];
+        imageFolder = graphsFolderImgsOutlier;
+        figureFolder = graphsFolderFigsOutlier;
+    end
+
 %% INLIER ARI COMPARISON
+    %{
     figure('name','Ari')
-    plot(epsilonRange, [finalTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
         "Marker", "o")
     hold on
-    plot(epsilonRange, [finalDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
         "Marker", "+")
-    plot(epsilonRange, [finalLOFDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalLOFDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
         "Marker", "s")
     lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
     lgd.FontSize = 15; % Change the font size to 14 points
     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
-    xlabel("\epsilon", "FontSize", 16)
+    xlabel(xLabelValue, "FontSize", 16)
     ylabel("ARI", "FontSize", 14)
     ylim([0 0.8])
     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ARI", 'png');
     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ARI");
-
+    %}
 
     %% MISCLASS ERROR
     figure('name','Misclassification Error')
-    plot(epsilonRange, [finalTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
         "Marker", "o")
     hold on
-    plot(epsilonRange, [finalDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
         "Marker", "+")
-    plot(epsilonRange, [finalLOFDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
+    plot(xPlotRange, [finalLOFDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
         "Marker", "s")
     lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
     lgd.FontSize = 15; % Change the font size to 14 points
     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
-    xlabel("\epsilon", "FontSize", 16)
+    xlabel(xLabelValue, "FontSize", 16)
     ylabel("Misclassification Error %", "FontSize", 14)
     ylim([0 0.8])
     %%%%%%%%%%%%%%%%%%%%%%% HERE
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ME", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ME");
+    saveas(gcf, imageFolder + datasetTitle + "_ME", 'png');
+    saveas(gcf, figureFolder + datasetTitle + "_ME");
 
     %% INLIER THRESHOLD - PARAMETER LAMBDA 1
     figure
-    plot(epsilonRange, lambda1, "s-", "LineWidth", 2, "Color", "#0072BD")
+    plot(xPlotRange, lambda1, "s-", "LineWidth", 2, "Color", "#0072BD")
     yline(mean(lambda1), "--", mean(lambda1), "LineWidth", 2.3, "Color", "#D95319", ...
         "LabelVerticalAlignment", "Bottom", ...
         "FontSize", 15)
-    title("Variation of lambda parameter based on \epsilon")
-    xlabel("\epsilon", "FontSize", 16)
+    title("Variation of lambda 1 parameter based on " + titleBasedOn)
+    xlabel(xLabelValue, "FontSize", 16)
     ylabel("\lambda_{1}(\epsilon)", "FontSize", 16)
     legend("\lambda_{1}(\epsilon)", "FontSize", 16)
-    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+    xlim([min(xPlotRange)-0.005, max(xPlotRange)+0.005])
     ylim([0, max(lambda1)+15])
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda1Variation", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda1Variation");
+    saveas(gcf, imageFolder + datasetTitle + "_Lambda1Variation", 'png');
+    saveas(gcf, figureFolder + datasetTitle + "_Lambda1Variation");
 
 
     %% INLIER THRESHOLD - PARAMETER LAMBDA 2
     figure
-    plot(epsilonRange, lambda2, "s-", "LineWidth", 2, "Color", "#0072BD")
+    plot(xPlotRange, lambda2, "s-", "LineWidth", 2, "Color", "#0072BD")
     yline(mean(lambda2), "--", mean(lambda2), "LineWidth", 2.3, "Color", "#D95319", ...
         "LabelVerticalAlignment", "Bottom", ...
         "FontSize", 15)
-    title("Variation of lambda parameter based on \epsilon")
-    xlabel("\epsilon", "FontSize", 16)
+    title("Variation of lambda 2 parameter based on " + titleBasedOn)
+    xlabel(xLabelValue, "FontSize", 16)
     ylabel("\lambda_{2}(\epsilon)", "FontSize", 16)
     legend("\lambda_{2}(\epsilon)", "FontSize", 16)
-    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+    xlim([min(xPlotRange)-0.005, max(xPlotRange)+0.005])
     ylim([0, max(lambda2)+15])
    
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda2Variation", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda2Variation");
+    saveas(gcf, imageFolder + datasetTitle + "_Lambda2Variation", 'png');
+    saveas(gcf, figureFolder + datasetTitle + "_Lambda2Variation");
     
     %% Improvement Comparison - How much our algorithm impact on ME?
     
@@ -195,10 +216,10 @@ if length(epsilonRange) > 1
     DynVsTlnk = [finalDynTLinkageMetric.misclassErr] - [finalTLinkageMetric.misclassErr];
     
     figure
-    bar(epsilonRange, [LOFDynVsTlnk; DynVsTlnk])
+    bar(xPlotRange, [LOFDynVsTlnk; DynVsTlnk])
     legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
     title("Delta ME [LOF] Dyn T-Link vs T-Link", "FontSize", 15)
-    xlabel("\epsilon", "FontSize", 16)
+    xlabel(xLabelValue, "FontSize", 16)
     ylabel("Delta % ME", "FontSize", 15)
     %xlim([min(epsilonRange)-0.05, max(epsilonRange)+0.005])
     ylim( [ ...
@@ -209,8 +230,8 @@ if length(epsilonRange) > 1
             [LOFDynVsTlnk'; DynVsTlnk'] ...
         )+0.05 ])
     
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ImprovementPerc", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ImprovementPerc");
+    saveas(gcf, imageFolder + datasetTitle + "_ImprovementPerc", 'png');
+    saveas(gcf, figureFolder + datasetTitle + "_ImprovementPerc");
     
 end
 

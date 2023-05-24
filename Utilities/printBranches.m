@@ -30,7 +30,7 @@ function printBranches(tree, X, root)
     clusterL = get_cluster_idxPoints(childL, X, tree);
     clusterR = get_cluster_idxPoints(childR, X, tree);
     cluster = [clusterL, clusterR];
-    leftOut = 1:500;
+    leftOut = 1:length(X);
     leftOut = leftOut(~ismember(leftOut, cluster));
 
     leftBranch = "Left Branch  (" + childL + ")";

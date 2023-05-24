@@ -2,6 +2,7 @@ function [X, G, numTotalPoints, numToClusterizePoints, numOutliers, numClusters,
 %GETDATASETINFO 
 %   If hasGroundTruth is false, then specify the dataset
 %   otherwise it will choose the only available with a ground truth
+    pointsPerCluster = 50;
 
     addpath("./DendrogramUtils/");
     
@@ -59,16 +60,25 @@ function [X, G, numTotalPoints, numToClusterizePoints, numOutliers, numClusters,
                 numToClusterizePoints = 250;    
                 numClusters = 5;
                 title ="Circles5_S00075_O50";
+            case 9
+                load './Dataset/simpleDataset.mat';
+                X = points;
+                numTotalPoints = length(X);
+                numToClusterizePoints = numTotalPoints;    
+                numClusters = 3;
+                title ="Lines3_15_O0";
+                pointsPerCluster = numTotalPoints / numClusters;
+
         end
         numOutliers = numTotalPoints - numToClusterizePoints;
-        G = generateGTLbls(numClusters, 50, numOutliers); %#ok<UNRCH>
+        G = generateGTLbls(numClusters, pointsPerCluster, numOutliers); %#ok<UNRCH>
     else
         load './Dataset/Star5.mat' X G;
         numTotalPoints = size(X, 2);
         numToClusterizePoints = size(find(G), 1);
         numClusters = 5;
         title ="Star5 Dataset - Ground Truth Labels";
+        numOutliers = numTotalPoints - numToClusterizePoints;
     end
 
-    numOutliers = numTotalPoints - numToClusterizePoints;
 end

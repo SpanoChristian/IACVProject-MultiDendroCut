@@ -18,8 +18,6 @@ function lbls = labelsAfterDynCut(X, tree, AltB, clusterThreshold, C)
             lbls(idxAB) = l;
         end
     end
-    
-	lbls = orderClusterLabels(lbls, 50, length(lbls));
 	
 end
 

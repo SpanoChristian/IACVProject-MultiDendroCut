@@ -40,6 +40,10 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         figure
     end
     
+    count1 = 0;
+    count2 = 0;
+    count3 = 0;
+    
     while ~isempty(S)
         currNode = S(1);
         [childL, childR] = get_children(currNode, tree);
@@ -116,14 +120,19 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         if isleaf(childL, X) && isleaf(childR, X)
             % Do something... what?
         elseif isleaf(childL, X) && ~isleaf(childR, X) && gScoreAfter(end) > gScoreBefore(end)
+            count1 = count1 + 1;
             S = [childR S];
         elseif ~isleaf(childL, X) && isleaf(childR, X) && gScoreAfter(end) > gScoreBefore(end)
+            count2 = count2 + 1;
             S = [childL S];
-        elseif gScoreAfter(end) > gScoreBefore(end)
+        elseif ~isleaf(childL, X) && ~isleaf(childR, X) && gScoreAfter(end) > gScoreBefore(end)
+            count3 = count3 + 1;
             S = [[childL childR] S];
         end
         
     end
+    
+    disp([["Count1 " count1]; ["Count2 " count2]; ["Count3 " count3]])
    
     % find all the clusters that are better if merged
     [~, idxAltB] = find(gScoreAfter < gScoreBefore);

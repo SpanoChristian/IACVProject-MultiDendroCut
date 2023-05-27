@@ -33,4 +33,3 @@ function [lblsDynCut, bestLambda1, bestLambda2, bestThreshold, toMergeClusters] 
     toMergeClustersOrdered = sort(toMergeClusters, "descend") %debug purpose
     lblsDynCut = labelsAfterDynCut(X, tree, toMergeClusters, bestThreshold);
 end
-

@@ -26,90 +26,78 @@ if ~labelled_data
     G = generateGTLbls(nClusters, clusterSize, nOutliers); %#ok<UNRCH>
 end
 
-epsilonRange = linspace(0.02, 0.25, 10);
-%epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
-
-outlierRange = linspace(250, 500, 10); % TODO to use
+%epsilonRange = linspace(0.02, 0.25, 10);
+epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
+%outlierRange = linspace(250, 500, 10); % TODO to use
 
 lambda1 = [];
 lambda2 = [];
 bestThresholds = [];
 
-for outlier = floor(outlierRange)
-    
-    [X, G, ~, ~, ~, nClusters, ~] = getDatasetAndInfo(labelled_data, 2);
-    X = X(:, 1:outlier);
-    
-    if ~labelled_data
-        G = generateGTLbls(nClusters, 50, i-250); %#ok<UNRCH>
+N = size(X, 2);
+S = mssUniform(X, 5*N, cardmss);
+H = hpFun(X, S); 
+R = res(X, H, distFun);
+
+for eps=1:length(epsilonRange)
+
+    P = prefMat(R, eps, 1);
+
+    if length(epsilonRange) > 1
+        display("Inlier threshold variation " + eps + " out of " + length(epsilonRange))
     end
-    
-    S = mssUniform(X, 5*N, cardmss);
-    H = hpFun(X, S); 
-    R = res(X, H, distFun);
-    
-    for eps=1:length(epsilonRange)
-        
-        P = prefMat(R, epsilon, 1);
 
-        if length(epsilonRange) > 1
-            display("Inlier threshold variation " + eps + " out of " + length(epsilonRange))
-        end
+    epsilon = epsilonRange(eps);
 
-        epsilon = epsilonRange(eps);
-
-        %% Perform T-Linkage
-        [lblsTLinkage, T] = t_linkage(X, distFun, epsilon, cardmss, hpFun);
-        tree = linkage_to_tree(T); %just for debugging
-        if length(epsilonRange) == -1
-            printBranches(tree, X, 999);
-        end
-
-        %% Perform Dynamic T-Linkage
-        [lblsDynTLinkage, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
-
-        lambda1(end + 1) = bestLambda1;
-        lambda2(end + 1) = bestLambda2;
-        bestThresholds(end + 1) = bestThreshold;
-
-        %% Outlier rejection step
-
-        %T-Linkage fit a model to all the data points. Outlier can be found in
-        %different ways (T-Linkage is agonostic about the outlier rejection strategy),
-        %for example discarding too small cluster, or exploiting the randomness of
-        %a model.
-
-        lblsTLinkage = operateOnOutliers(lblsTLinkage, cardmss);
-        %lblsDynTLinkage = operateOnOutliers(lblsDynTLinkage, cardmss);
-
-
-        %% Order labels step
-        lblsTLinkage = orderClusterLabels(lblsTLinkage, clusterSize, nTotPoints);
-        lblsDynTLinkage = orderClusterLabels(lblsDynTLinkage, clusterSize, nTotPoints);
-
-        candidateOutliers = LOF(X');
-        lblsLOFDynCut = lblsDynTLinkage;
-        lblsLOFDynCut(candidateOutliers) = 0;
-        %% Showing results
-        if length(epsilonRange) == 1
-            figure('name','Assigned labels')
-            s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
-            s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
-            s = subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
-        end
-
-        %% Compare clustering
-        tLinkageMetrics = compareClustering(G, lblsTLinkage);
-        dynTLinkageMetrics = compareClustering(G, lblsDynTLinkage);
-        LOFdynTLinkageMetrics = compareClustering(G, lblsLOFDynCut);
-
-        metrics(eps).tLinkage = tLinkageMetrics;
-        metrics(eps).dynTLinkage = dynTLinkageMetrics;
-        metrics(eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
+    %% Perform T-Linkage
+    [lblsTLinkage, T] = t_linkage(X, distFun, epsilon, cardmss, hpFun);
+    tree = linkage_to_tree(T); %just for debugging
+    if length(epsilonRange) == -1
+        printBranches(tree, X, 999);
     end
-    
-end  
 
+    %% Perform Dynamic T-Linkage
+    [lblsDynTLinkage, bestLambda1, bestLambda2, bestThreshold] = dynamicTLinkage(X, T, G, lblsTLinkage, epsilon, isMergeableGricModel, clusterThreshold);
+
+    lambda1(end + 1) = bestLambda1;
+    lambda2(end + 1) = bestLambda2;
+    bestThresholds(end + 1) = bestThreshold;
+
+    %% Outlier rejection step
+
+    %T-Linkage fit a model to all the data points. Outlier can be found in
+    %different ways (T-Linkage is agonostic about the outlier rejection strategy),
+    %for example discarding too small cluster, or exploiting the randomness of
+    %a model.
+
+    lblsTLinkage = operateOnOutliers(lblsTLinkage, cardmss);
+    %lblsDynTLinkage = operateOnOutliers(lblsDynTLinkage, cardmss);
+
+
+    %% Order labels step
+    lblsTLinkage = orderClusterLabels(lblsTLinkage, clusterSize, nTotPoints);
+    %lblsDynTLinkage = orderClusterLabels(lblsDynTLinkage, clusterSize, nTotPoints);
+
+    candidateOutliers = LOF(X');
+    lblsLOFDynCut = lblsDynTLinkage;
+    lblsLOFDynCut(candidateOutliers) = 0;
+    %% Showing results
+    if length(epsilonRange) == 1
+        figure('name','Assigned labels')
+        s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
+        s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
+        s = subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
+    end
+
+    %% Compare clustering
+    tLinkageMetrics = compareClustering(G, lblsTLinkage);
+    dynTLinkageMetrics = compareClustering(G, lblsDynTLinkage);
+    LOFdynTLinkageMetrics = compareClustering(G, lblsLOFDynCut);
+
+    metrics(eps).tLinkage = tLinkageMetrics;
+    metrics(eps).dynTLinkage = dynTLinkageMetrics;
+    metrics(eps).LOFdynTLinkage = LOFdynTLinkageMetrics;
+end
 
 %% Different parameter comparisons
 if length(epsilonRange) > 1

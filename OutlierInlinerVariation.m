@@ -21,13 +21,21 @@ labelled_data = false;
 
 gscatter(X(1, :), X(2, :), G)
 
-epsilonRange = linspace(0.01, 0.25, 8);
-outlierRange = linspace(nTotPoints-nRealPoints, nTotPoints, 8);
 %epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
 
 bestThresholds = [];
 
 idxOutlier = 1;
+
+onlyInlier = false;
+
+if onlyInlier
+    outlierRange = 1;
+else
+    outlierRange = linspace(nTotPoints-nRealPoints, nTotPoints, 10);
+end
+
+epsilonRange = linspace(0.01, 0.25, 10);
 
 outlierLen = length(outlierRange);
 epsilonLen = length(epsilonRange);
@@ -40,19 +48,21 @@ bestThresholdsInlier = zeros(outlierLen, epsilonLen);
 lambda1 = zeros(outlierLen, epsilonLen);
 lambda2 = zeros(outlierLen, epsilonLen);
 
-
 for outlier = floor(outlierRange)
     
-    disp("Outlier Iteration " + idxOutlier + " of " + outlierLen)
-    
-    [X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
-    X = X(:, 1:outlier);
+    if ~onlyInlier
+        disp("Outlier Iteration " + idxOutlier + " of " + outlierLen)
+
+        [X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
+        X = X(:, 1:outlier);
+
+        if ~labelled_data
+            G = generateGTLbls(nClusters, 50, outlier-250); %#ok<UNRCH>
+        end
+
+    end
     
     N = size(X, 2);
-    
-    if ~labelled_data
-        G = generateGTLbls(nClusters, 50, outlier-250); %#ok<UNRCH>
-    end
     
     S = mssUniform(X, 5*N, cardmss);
     H = hpFun(X, S); 
@@ -148,122 +158,132 @@ end  % End-For outlier variation
 
 % x = cols = epsilon
 % y = rows = outliers
-outlierRange = ((outlierRange-250)/250);
-figure
-surface(epsilonRange, outlierRange, tLinkageME, 'FaceColor', "#0072BD")
-hold on
-surface(epsilonRange, outlierRange, dynTLinkageME, 'FaceColor', "#D95319")
-surface(epsilonRange, outlierRange, lofDynTLinkageME, 'FaceColor', "#EDB120")
-ylabel("Outliers")
-xlabel("\epsilon")
-zlabel("ME(outlier, \epsilon)")
-title("ME based on outlier and inlier threshold")
-legend("T-Link", "Dyn T-Link", "LOF Dyn T-Link")
-
-hold off
-
-%% Different parameter comparisons
-if length(epsilonRange) > 1
-    finalTLinkageMetric = [metrics.tLinkage];
-    finalDynTLinkageMetric = [metrics.dynTLinkage];
-    finalLOFDynTLinkageMetric = [metrics.LOFdynTLinkage];
-%% INLIER ARI COMPARISON
-    figure('name','Ari')
-    plot(epsilonRange, [finalTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
-        "Marker", "o")
+if ~onlyInlier
+    outlierRange = ((outlierRange-250)/250);
+    figure
+    surface(epsilonRange, outlierRange, tLinkageME, 'FaceColor', "#0072BD")
     hold on
-    plot(epsilonRange, [finalDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
-        "Marker", "+")
-    plot(epsilonRange, [finalLOFDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
-        "Marker", "s")
-    lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
-    lgd.FontSize = 15; % Change the font size to 14 points
-    title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
-    xlabel("\epsilon", "FontSize", 16)
-    ylabel("ARI", "FontSize", 14)
-    ylim([0 0.8])
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ARI", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ARI");
+    surface(epsilonRange, outlierRange, dynTLinkageME, 'FaceColor', "#D95319")
+    surface(epsilonRange, outlierRange, lofDynTLinkageME, 'FaceColor', "#EDB120")
+    ylabel("Outliers")
+    xlabel("\epsilon")
+    zlabel("ME(outlier, \epsilon)")
+    title("ME based on outlier and inlier threshold")
+    legend("T-Link", "Dyn T-Link", "LOF Dyn T-Link")
 
-
-    %% MISCLASS ERROR
-    figure('name','Misclassification Error')
-    plot(epsilonRange, [finalTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
-        "Marker", "o")
-    hold on
-    plot(epsilonRange, [finalDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
-        "Marker", "+")
-    plot(epsilonRange, [finalLOFDynTLinkageMetric.misclassErr], "-", "LineWidth", 2, ...
-        "Marker", "s")
-    lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
-    lgd.FontSize = 15; % Change the font size to 14 points
-    title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
-    xlabel("\epsilon", "FontSize", 16)
-    ylabel("Misclassification Error %", "FontSize", 14)
-    ylim([0 0.8])
-    %%%%%%%%%%%%%%%%%%%%%%% HERE
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ME", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ME");
-
-    %% INLIER THRESHOLD - PARAMETER LAMBDA 1
-    figure
-    plot(epsilonRange, lambda1, "s-", "LineWidth", 2, "Color", "#0072BD")
-    yline(mean(lambda1), "--", mean(lambda1), "LineWidth", 2.3, "Color", "#D95319", ...
-        "LabelVerticalAlignment", "Bottom", ...
-        "FontSize", 15)
-    title("Variation of lambda parameter based on \epsilon")
-    xlabel("\epsilon", "FontSize", 16)
-    ylabel("\lambda_{1}(\epsilon)", "FontSize", 16)
-    legend("\lambda_{1}(\epsilon)", "FontSize", 16)
-    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
-    ylim([0, max(lambda1)+15])
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda1Variation", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda1Variation");
-
-
-    %% INLIER THRESHOLD - PARAMETER LAMBDA 2
-    figure
-    plot(epsilonRange, lambda2, "s-", "LineWidth", 2, "Color", "#0072BD")
-    yline(mean(lambda2), "--", mean(lambda2), "LineWidth", 2.3, "Color", "#D95319", ...
-        "LabelVerticalAlignment", "Bottom", ...
-        "FontSize", 15)
-    title("Variation of lambda parameter based on \epsilon")
-    xlabel("\epsilon", "FontSize", 16)
-    ylabel("\lambda_{2}(\epsilon)", "FontSize", 16)
-    legend("\lambda_{2}(\epsilon)", "FontSize", 16)
-    xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
-    ylim([0, max(lambda2)+15])
-   
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda2Variation", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda2Variation");
-    
-    %% Improvement Comparison - How much our algorithm impact on ME?
-    
-    % LOF Dynamic T-Linkage vs T-Linkage
-    LOFDynVsTlnk = [finalLOFDynTLinkageMetric.misclassErr] - [finalTLinkageMetric.misclassErr];
-    
-    % Dynamic T-Linkage vs T-Linkage
-    DynVsTlnk = [finalDynTLinkageMetric.misclassErr] - [finalTLinkageMetric.misclassErr];
+    hold off
     
     figure
-    bar(epsilonRange, [LOFDynVsTlnk; DynVsTlnk])
-    legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
-    title("Delta ME [LOF] Dyn T-Link vs T-Link", "FontSize", 15)
-    xlabel("\epsilon", "FontSize", 16)
-    ylabel("Delta % ME", "FontSize", 15)
-    %xlim([min(epsilonRange)-0.05, max(epsilonRange)+0.005])
-    ylim( [ ...
-        min( ...
-            [LOFDynVsTlnk'; DynVsTlnk'] ...
-        )-0.05, ...
-        max( ...
-            [LOFDynVsTlnk'; DynVsTlnk'] ...
-        )+0.05 ])
-    
-    saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ImprovementPerc", 'png');
-    saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ImprovementPerc");
-    
+    surface(epsilonRange, outlierRange, bestThresholdsInlier)
+    ylabel("Outliers")
+    xlabel("\epsilon")
+    zlabel("Best Cluster Threshold")
+    title("Best cluster threshold based on outlier and inlier threshold")
+    legend("Best Cluster Threshold")
 end
+
+% %% Different parameter comparisons
+% if length(epsilonRange) > 1
+%     %finalTLinkageMetric = [metrics.tLinkage];
+%     %finalDynTLinkageMetric = [metrics.dynTLinkage];
+%     %finalLOFDynTLinkageMetric = [metrics.LOFdynTLinkage];
+% %% INLIER ARI COMPARISON
+% %     figure('name','Ari')
+% %     plot(epsilonRange, [finalTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+% %         "Marker", "o")
+% %     hold on
+% %     plot(epsilonRange, [finalDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+% %         "Marker", "+")
+% %     plot(epsilonRange, [finalLOFDynTLinkageMetric.ariScore], "-", "LineWidth", 2, ...
+% %         "Marker", "s")
+% %     lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
+% %     lgd.FontSize = 15; % Change the font size to 14 points
+% %     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
+% %     xlabel("\epsilon", "FontSize", 16)
+% %     ylabel("ARI", "FontSize", 14)
+% %     ylim([0 0.8])
+% %     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ARI", 'png');
+% %     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ARI");
+% 
+% 
+%     %% MISCLASS ERROR
+%     figure('name','Misclassification Error')
+%     plot(epsilonRange, tLinkageME, "-", "LineWidth", 2, ...
+%         "Marker", "o")
+%     hold on
+%     plot(epsilonRange, dynTLinkageME, "-", "LineWidth", 2, ...
+%         "Marker", "+")
+%     plot(epsilonRange, lofDynTLinkageME, "-", "LineWidth", 2, ...
+%         "Marker", "s")
+%     lgd = legend("T-Link ME", "Dyn T-Link ME", "LOF Dyn T-Link");
+%     lgd.FontSize = 15; % Change the font size to 14 points
+%     title("Comparison T-Linkage vs. [LOF] Dynamic T-Linkage")
+%     xlabel("\epsilon", "FontSize", 16)
+%     ylabel("Misclassification Error %", "FontSize", 14)
+%     ylim([0 0.8])
+%     %%%%%%%%%%%%%%%%%%%%%%% HERE
+%     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ME", 'png');
+%     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ME");
+% 
+%     %% INLIER THRESHOLD - PARAMETER LAMBDA 1
+%     figure
+%     plot(epsilonRange, lambda1, "s-", "LineWidth", 2, "Color", "#0072BD")
+%     yline(mean(lambda1), "--", mean(lambda1), "LineWidth", 2.3, "Color", "#D95319", ...
+%         "LabelVerticalAlignment", "Bottom", ...
+%         "FontSize", 15)
+%     title("Variation of lambda parameter based on \epsilon")
+%     xlabel("\epsilon", "FontSize", 16)
+%     ylabel("\lambda_{1}(\epsilon)", "FontSize", 16)
+%     legend("\lambda_{1}(\epsilon)", "FontSize", 16)
+%     xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+%     ylim([0, max(lambda1)+15])
+%     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda1Variation", 'png');
+%     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda1Variation");
+% 
+% 
+%     %% INLIER THRESHOLD - PARAMETER LAMBDA 2
+%     figure
+%     plot(epsilonRange, lambda2, "s-", "LineWidth", 2, "Color", "#0072BD")
+%     yline(mean(lambda2), "--", mean(lambda2), "LineWidth", 2.3, "Color", "#D95319", ...
+%         "LabelVerticalAlignment", "Bottom", ...
+%         "FontSize", 15)
+%     title("Variation of lambda parameter based on \epsilon")
+%     xlabel("\epsilon", "FontSize", 16)
+%     ylabel("\lambda_{2}(\epsilon)", "FontSize", 16)
+%     legend("\lambda_{2}(\epsilon)", "FontSize", 16)
+%     xlim([min(epsilonRange)-0.005, max(epsilonRange)+0.005])
+%     ylim([0, max(lambda2)+15])
+%    
+%     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_Lambda2Variation", 'png');
+%     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_Lambda2Variation");
+%     
+%     %% Improvement Comparison - How much our algorithm impact on ME?
+%     
+%     % LOF Dynamic T-Linkage vs T-Linkage
+%     LOFDynVsTlnk = lofDynTLinkageME - tLinkageME;
+%     
+%     % Dynamic T-Linkage vs T-Linkage
+%     DynVsTlnk = dynTLinkageME - tLinkageME;
+%     
+%     figure
+%     bar(epsilonRange, [LOFDynVsTlnk; DynVsTlnk])
+%     legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
+%     title("Delta ME [LOF] Dyn T-Link vs T-Link", "FontSize", 15)
+%     xlabel("\epsilon", "FontSize", 16)
+%     ylabel("Delta % ME", "FontSize", 15)
+%     %xlim([min(epsilonRange)-0.05, max(epsilonRange)+0.005])
+%     ylim( [ ...
+%         min( ...
+%             [LOFDynVsTlnk'; DynVsTlnk'] ...
+%         )-0.05, ...
+%         max( ...
+%             [LOFDynVsTlnk'; DynVsTlnk'] ...
+%         )+0.05 ])
+%     
+%     saveas(gcf, graphsFolderImgsInlier + datasetTitle + "_ImprovementPerc", 'png');
+%     saveas(gcf, graphsFolderFigsInlier + datasetTitle + "_ImprovementPerc");
+%     
+% end
 
 
 

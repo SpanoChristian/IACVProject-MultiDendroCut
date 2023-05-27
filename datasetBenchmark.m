@@ -16,9 +16,9 @@ outlierRange = linspace(250, 500, 10);
 % Otherwise: false
 labelled_data = false;
 
-model2fit = 'line';
+model2fit = 'circle';
 
-for i = 2:2
+for i = 8:8
 
     [X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, i);
   
@@ -30,7 +30,7 @@ for i = 2:2
         %inlierVariationNew(X, G, epsilonRange, model2fit);
     
     [misclassErrOut, ARIOut, NMIOut, ARINMIOut, lambda1Out, lambda2Out, thresholdsOut] = ...
-        outlierVariationNew(model2fit, 0.085, outlierRange);
+        outlierVariationNew(model2fit, 0.12, outlierRange);
 
     %% 
 %     figure
@@ -163,7 +163,7 @@ for i = 2:2
         "LabelVerticalAlignment", "Bottom", ...
         "FontSize", 15)
     title("Variation of \lambda_{1} parameter based on outlier %")
-    xlabel("\lambda_{1}", "FontSize", 16)
+    xlabel("Outlier %", "FontSize", 16)
     ylabel("\lambda_{1}(out%)", "FontSize", 16)
     legend("\lambda_{1}(out%)", "FontSize", 16)
     xlim([min(outlierRange)-0.005, max(outlierRange)+0.005])
@@ -179,7 +179,7 @@ for i = 2:2
         "LabelVerticalAlignment", "Bottom", ...
         "FontSize", 15)
     title("Variation of \lambda_{2} parameter based on outlier %")
-    xlabel("\lambda_{2}", "FontSize", 16)
+    xlabel("Outlier %", "FontSize", 16)
     ylabel("\lambda_{2}(out%)", "FontSize", 16)
     legend("\lambda_{2}(out%)", "FontSize", 16)
     
@@ -187,20 +187,29 @@ for i = 2:2
     saveas(gcf, graphsFolderImgsOutlier + datasetTitle + "_Lambda2Variation", 'png');
     saveas(gcf, graphsFolderFigsOutlier + datasetTitle + "_Lambda2Variation");
     
+    
     %% Improvement Comparison - How much our algorithm impact on ME?
     
     % LOF Dynamic T-Linkage vs T-Linkage
-    LOFDynVsTlnk = misclassErrOut(:, 1) - misclassErrOut(:, 3);
+    LOFDynVsTlnk = misclassErrOut(:, 3) - misclassErrOut(:, 1);
     
     % Dynamic T-Linkage vs T-Linkage
-    DynVsTlnk = misclassErrOut(:, 1) - misclassErrOut(:, 2);
+    DynVsTlnk = misclassErrOut(:, 2) - misclassErrOut(:, 1);
     
     figure
     bar(outlierRange, [LOFDynVsTlnk'; DynVsTlnk'])
     legend("LOF", "DYN", "Location", "Best", "FontSize", 14)
-    title("Improvement of [LOF] Dynamic T-Linkage", "FontSize", 15)
+    title("Delta ME [LOF] Dyn T-Link vs T-Link", "FontSize", 15)
     xlabel("Outlier %", "FontSize", 16)
-    ylabel("% ME Improved", "FontSize", 15)
+    ylabel("Delta % ME", "FontSize", 15)
+    %xlim([min(epsilonRange)-0.05, max(epsilonRange)+0.005])
+    ylim( [ ...
+        min( ...
+            [LOFDynVsTlnk'; DynVsTlnk'] ...
+        )-0.05, ...
+        max( ...
+            [LOFDynVsTlnk'; DynVsTlnk'] ...
+        )+0.05 ])
     
     saveas(gcf, graphsFolderImgsOutlier + datasetTitle + "_ImprovementPerc", 'png');
     saveas(gcf, graphsFolderFigsOutlier + datasetTitle + "_ImprovementPerc");

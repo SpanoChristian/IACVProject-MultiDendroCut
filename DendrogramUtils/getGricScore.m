@@ -13,7 +13,7 @@ rSqr = ri.^2;
 n = numel(rSqr);
 
 % Sum for number of rSqr element
-dataFidelity = min(mean(rSqr./sigma), 100);
+dataFidelity = min(mean(rSqr), 100);
 
 %dataFidelity = sum(min(rSqr/sigma, 'omitnan'), 10);
 modelComplexity = 1/(exp(-(((n-lambda1)/(lambda2)))^(2)));

@@ -49,7 +49,7 @@ function [ok, msScore] = isMergeableGricCircle(XLR, XL, XR, lambda1, lambda2, to
     %% compare gric score
     ok = gAfter < gBefore;
     %% package result
-    msScore.model = 'line';
+    msScore.model = 'circle';
     msScore.gric.before = gBefore;
     msScore.gric.after = gAfter;
 

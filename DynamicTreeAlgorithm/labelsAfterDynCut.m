@@ -13,10 +13,8 @@ function lbls = labelsAfterDynCut(X, tree, AltB, clusterThreshold, C)
     
     for i = 1:sizeAltB
         [idxAB, P] = getClusterPoints(AltB(i), X, tree);
-        if length(P) > clusterThreshold
-            l = l + 1;
-            lbls(idxAB) = l;
-        end
+        l = l + 1;
+        lbls(idxAB) = l;
     end
 	
 end

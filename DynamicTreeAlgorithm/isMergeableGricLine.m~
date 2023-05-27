@@ -1,4 +1,4 @@
-function [ok, msScore, msOutput] = isMergeableGricCircle(X, XL, XR, lambda1, lambda2, sigma)
+function [ok, msScore, msOutput] = isMergeableGricLine(X, XL, XR, k, nClustersFoundSoFar, currNode, root)
 % Check if two clusters A and B can be merged.
 % The test performs the following steps:
 % i) a model i on the first cluster is computed
@@ -36,23 +36,23 @@ Xi = XL;
 Xj = XR;
 Xij = X;
 % fit a model on Ci, Cj and Ci U Cj
-if size(Xi, 2) >= 3
-    mi = fit_circle(Xi);
-    ri = res_circle(Xi, mi);
+if size(Xi, 2) >= 2
+    mi = fitline(Xi);
+    ri = res_line(Xi, mi);
 else
     ri = 10;
 end
 
-if size(Xj, 2) >= 3
-    mj = fit_circle(Xj);
-    rj = res_circle(Xj, mj);
+if size(Xj, 2) >= 2
+    mj = fitline(Xj);
+    rj = res_line(Xj, mj);
 else
     rj = 10;
 end
 
-if size(Xij, 2) >= 3
-    mij = fit_circle(Xij);
-    rij = res_circle(Xij, mij);
+if size(Xij, 2) >= 2
+    mij = fitline(Xij);
+    rij = res_line(Xij, mij);
 else
     rij = 10;
 end
@@ -70,17 +70,23 @@ if(nargin < 6)
 end
 %% compute gric score
 % gric score before the merge (the sum of gric on individual models)
-[gi, dfi, mci]  = getGricScore(rSqri, sigma, lambda1, lambda2);
-[gj, dfj, mcj] = getGricScore(rSqrj, sigma, lambda1, lambda2);
+weight = 1/2;
+if currNode == root
+    nClustersFoundSoFar = nClustersFoundSoFar + 1;
+end
+
+[gi, dfi, mci]  = getGricScore(rSqri, sigma, k, nClustersFoundSoFar, weight);
+[gj, dfj, mcj] = getGricScore(rSqrj, sigma, k, nClustersFoundSoFar, weight);
 gBefore = gi + gj;
 dfBefore = dfi + dfj;
 mcBefore = mci + mcj;
 % gric score after the merge
-[gAfter, dfAfter, mcAfter]  = getGricScore(rSqrij, sigma, lambda1, lambda2);
+weight = 1;
+[gAfter, dfAfter, mcAfter]  = getGricScore(rSqrij, sigma, k, nClustersFoundSoFar, weight);
 %% compare gric score
 ok = gAfter < gBefore;
 %% package result
-msScore.model = 'circle';
+msScore.model = 'line';
 msScore.gric.before = gBefore;
 msScore.fidelity.before = dfBefore;
 msScore.complexity.before = mcBefore;

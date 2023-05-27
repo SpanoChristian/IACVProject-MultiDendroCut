@@ -19,7 +19,7 @@
 %           the name of the cluster)
 
 function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
-    tree, inlierThreshold, model2fit, verbose)
+    tree, lambda1, lambda2, inlierThreshold, model2fit, verbose)
 
     totalNumPoints = size(X, 2);
 
@@ -32,6 +32,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     gComplexityBefore = [];
     gComplexityAfter = [];
     perc = 0;
+    nClustersFoundSoFar = 0;
      
     V = [];                    % visited nodes
     S = root;                  % stack - init: root node
@@ -42,7 +43,6 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
     
     while ~isempty(S)
         currNode = S(1);
-        nClustersFoundSoFar = length(S);
         [childL, childR] = get_children(currNode, tree);
        
         [idxL, XL] = getClusterPoints(childL, X, tree);
@@ -53,7 +53,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
 
-        [newOk, gricScore] = model2fit(XLR, XL, XR, 3, nClustersFoundSoFar);
+        [newOk, gricScore] = model2fit(XLR, XL, XR, 5, nClustersFoundSoFar);
     
         % before: when clusters are not merged
         % after: when clusters are merged
@@ -62,16 +62,12 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         OK(end+1) = newOk;
         gScoreBefore(end+1) = gricScore.gric.before;
         gScoreAfter(end+1) = gricScore.gric.after;
-        gFidelityBefore(end+1) = gricScore.fidelity.before;
-        gFidelityAfter(end+1) = gricScore.fidelity.after;
-        gComplexityBefore(end+1) = gricScore.complexity.before;
-        gComplexityAfter(end+1) = gricScore.complexity.after;
         
-        if gricScore.gric.after > gricScore.gric.before
+        if currNode==root && gricScore.gric.after > gricScore.gric.before
             nClustersFoundSoFar = nClustersFoundSoFar + 1;
+        elseif currNode && gricScore.gric.after > gricScore.gric.before
+            
         end
-        
-        disp(["Clusters found so far " nClustersFoundSoFar])
         
         %{
             gFidelityBefore(end+1) = gricScore.fidelity.before;

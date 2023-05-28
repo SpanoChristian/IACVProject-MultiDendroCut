@@ -16,8 +16,8 @@ graphsFolderFigsOutlier = "Graphs/Figures/OutlierVariation/";
 clusterSize = 50;
 clusterThreshold = 25;
 labelled_data = false;
-[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 2);
-[distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
+[X, G, nTotPoints, nRealPoints, nOutliers, nClusters, datasetTitle] = getDatasetAndInfo(labelled_data, 8);
+[distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('circle');
 
 gscatter(X(1, :), X(2, :), G)
 
@@ -27,7 +27,7 @@ if ~labelled_data
 end
 
 %epsilonRange = linspace(0.02, 0.25, 10);
-epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
+epsilonRange = 0.09; % An inlier threshold value epsilon has to be specified.
 %outlierRange = linspace(250, 500, 10); % TODO to use
 
 lambda1 = [];
@@ -88,6 +88,8 @@ for eps=1:length(epsilonRange)
         s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
         s = subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
     end
+
+    plotMisclassified(X, G, lblsTLinkage, lblsDynTLinkage)
 
     %% Compare clustering
     tLinkageMetrics = compareClustering(G, lblsTLinkage);

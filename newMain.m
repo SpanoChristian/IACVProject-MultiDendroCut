@@ -1,12 +1,18 @@
+close all
 addpath(genpath('.'));
 plotBoundaries = 1.1;
-coefficients = [3 -0.5 0 -3];
-q = [0.2 0.7 0.6 1];
-pointsPerCluster= [200 20 150 30];
+coefficients = [-3 -0.5 0 3];
+q = [1 0.7 0.6 0.2];
+pointsPerCluster= [50 20 100 60];
 figure
 hold on
 X = zeros(2, sum(pointsPerCluster));
-for i = 1:length(coefficients)
+
+pathname= "Graphs/Images/";
+filename = length(pointsPerCluster);
+
+for i = 1:length(pointsPerCluster)
+    filename = filename + "_" + pointsPerCluster(i);
     range = (1 + sum(pointsPerCluster(1:(i - 1)))):(sum(pointsPerCluster(1:i)));
     X(1, range) = (rand(1,pointsPerCluster(i)) - 0.5)*2;
     X(2, range) = coefficients(i) .* X(1, range) + q(i);
@@ -25,11 +31,12 @@ numTotPoints = length(X);
 nRealPoints = numTotPoints;
 nOutliers = 0;
 numToClusterizePoints = numTotPoints;    
-nClusters = 3;
+nClusters = length(pointsPerCluster);
 datasetTitle ="Lines3_15_O0";
 %pointsPerCluster = numTotPoints / nClusters;
 G = generateGTLbls(nClusters, pointsPerCluster, nOutliers);
 gscatter(X(1,:), X(2,:), G)
+saveas(gcf, "Line4 dataset", 'png');
 [distFun, hpFun, fit_model, cardmss, isMergeableGricModel] = set_model('line');
 
 epsilonRange = 0.12; % An inlier threshold value epsilon has to be specified.
@@ -80,10 +87,13 @@ lblsLOFDynCut(candidateOutliers) = 0;
 %% Showing results
 if length(epsilonRange) == 1 && length(outlierRange) == 1
     figure('name','Assigned labels')
-    s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
-    s = subplot(1,3,2); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
-    s = subplot(1,3,3); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
+    %s = subplot(1,3,1); gscatter(X(1,:),X(2,:), G); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('GroundTruth'); legend off
+    s = subplot(1,2,1); gscatter(X(1,:),X(2,:), lblsTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('T linkage'); legend off
+    s = subplot(1,2,2); gscatter(X(1,:),X(2,:), lblsDynTLinkage); axis(s, 'equal'); xlim(s, [-plotBoundaries plotBoundaries]); ylim(s, [-plotBoundaries plotBoundaries]); title('Dyn T linkage'); legend off
+    
+    saveas(gcf, pathname + filename, 'png');
 end
+
 %% Compare clustering
 tLinkageMetrics = compareClustering(G, lblsTLinkage)
 dynTLinkageMetrics = compareClustering(G, lblsDynTLinkage)

@@ -19,7 +19,7 @@
 %           the name of the cluster)
 
 function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
-    tree, inlierThreshold, model2fit, verbose)
+    tree, inlierThreshold, model2fit, nClusters, verbose)
 
     totalNumPoints = size(X, 2);
 
@@ -53,7 +53,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
 %               ["XLR size : " size(XLR)]])
 %         disp(["Current Node : " currNode])
 
-        [newOk, gricScore] = model2fit(XLR, XL, XR, 3, nClustersFoundSoFar);
+        [newOk, gricScore] = model2fit(XLR, XL, XR, nClusters, nClustersFoundSoFar);
     
         % before: when clusters are not merged
         % after: when clusters are merged

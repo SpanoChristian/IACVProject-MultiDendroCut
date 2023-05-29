@@ -18,16 +18,23 @@ dataFidelity = min(mean(rSqr./sigma, 'omitnan'), 1);
 %modelComplexity = (n - lambda)^2;
 modelComplexity = weight*abs(k - nC);
 
+dataFidelity = dataFidelity * (1/(n+1));
+%modelComplexity = (1/(n + 1)) * modelComplexity;
+
+
 % Rationale: hav
-gScore = dataFidelity*(1/(n+1)) + modelComplexity;
+gScore = dataFidelity + modelComplexity;
 
 
+assert(gScore == dataFidelity + modelComplexity, 'not matching in getGricScore')
+
+%{
 disp([["C found    : " nC]; ...
       ["Min Res    : " mean(rSqr)]; ...
       ["Complexity : " modelComplexity]; ...
       ["Fidelity   : " dataFidelity]; ...
       ["gScore     : " gScore]])
 disp(["C/Gscore : " modelComplexity + " vs. " + dataFidelity]);
-
+%}
 end
 

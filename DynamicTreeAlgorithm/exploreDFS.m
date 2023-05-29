@@ -71,8 +71,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
             nClustersFoundSoFar = nClustersFoundSoFar + 1;
         end
         
-        disp(["Clusters found so far " nClustersFoundSoFar])
-        
+        %TOCHECK
         %{
             gFidelityBefore(end+1) = gricScore.fidelity.before;
             gFidelityAfter(end+1) = gricScore.fidelity.after;
@@ -82,6 +81,7 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
         
         
         if verbose
+            disp(["Clusters found so far " nClustersFoundSoFar])
             subplot(1, 2, 1)
             plot(XLR(1, :), XLR(2, :), "o", "MarkerFaceColor", "b")
             title("Joined Cluster")
@@ -114,14 +114,33 @@ function [OK, gScoreBefore, gScoreAfter, V, AltB] = exploreDFS(root, X, ...
             hold off
             
             pause(1)
+
+
         end
-% 
-        disp([["Fidelity Before : " gFidelityBefore(end)]; ... 
+
+
+
+        disp([ ["Curr node: " currNode];...
+                ["Fidelity Before : " gFidelityBefore(end)]; ... 
                 ["Fidelity After : " gFidelityAfter(end)]; ...
                 ["Complexity Before : " gComplexityBefore(end)]; ...
-                ["Complexity After : " gComplexityAfter(end)]])
+                ["Complexity After : " gComplexityAfter(end)]; ...
+                ])
         disp([gScoreAfter(end) " <= " gScoreBefore(end) " ?"])
+        if gScoreAfter(end) > gScoreBefore(end)
+            disp("Split " + currNode + " into " + childL + " and " + childR)
+        else
+            disp("Dont split");
+        end
+
+        disp('................................');
+
         
+        %assert(gScoreBefore(end) == gFidelityBefore(end) + gComplexityBefore(end), 'not matching in explore DFS')
+
+
+
+
         V = [V currNode];
         S(1) = [];
         

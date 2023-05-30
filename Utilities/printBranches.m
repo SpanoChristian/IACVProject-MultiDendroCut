@@ -46,18 +46,40 @@ function printBranches(tree, X, root)
     ax.Layout.Column = [1 2];
 
     if length(leftOut) > 0
+        coeff = fitline(X(:,leftOut))
+        m = coeff(1)/coeff(2) * (-1);
+        q = coeff(3)/coeff(2) * (-1);
+        plot(ax, X(1, leftOut), m * X(1, leftOut) + q, "-", "MarkerFaceColor", "r", "DisplayName", "Fitted NB");
+        hold(ax, 'on');
         plot(ax, X(1, leftOut), X(2, leftOut), "o", "MarkerFaceColor", "r", "DisplayName", "Not Belonging");
         hold(ax, 'on');
     end
 
-    if length(clusterR) > 0
+    if length(clusterL) > 0
+        coeff = fitline(X(:,clusterL))
+        m = coeff(1)/coeff(2) * (-1);
+        q = coeff(3)/coeff(2) * (-1);
+        plot(ax, X(1, clusterL), m * X(1, clusterL) + q, "-", "MarkerFaceColor", "g", "DisplayName", "Fitted L: " + childL);
+        hold(ax, 'on');
         plot(ax, X(1, clusterL), X(2, clusterL), "o", "MarkerFaceColor", "g", "DisplayName", "leftBranch");
         hold(ax, 'on');
     end
     if length(clusterR) > 0
+        coeff = fitline(X(:,clusterR))
+        m = coeff(1)/coeff(2) * (-1);
+        q = coeff(3)/coeff(2) * (-1);
+        plot(ax, X(1, clusterR), m * X(1, clusterR) + q, "-", "MarkerFaceColor", "b", "DisplayName", "Fitted R: " + childR);
+        hold(ax, 'on');
         plot(ax, X(1, clusterR), X(2, clusterR), "o", "MarkerFaceColor", "b", "DisplayName", "rightBranch");
         hold(ax, 'on');
     end
+
+
+    coeff = fitline(X)
+    m = coeff(1)/coeff(2) * (-1);
+    q = coeff(3)/coeff(2) * (-1);
+    plot(ax, X(1, :), m * X(1, :) + q, "-", "MarkerFaceColor", "k", "DisplayName", "Fitted P: " + root);
+    hold(ax, 'on');
     
     legend(ax, 'Location','bestoutside');
     title(ax, "Points belonging to cluster " + root);

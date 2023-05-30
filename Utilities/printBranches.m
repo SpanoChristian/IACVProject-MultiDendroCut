@@ -45,8 +45,8 @@ function printBranches(tree, X, root)
     ax.Layout.Row = [1 2];
     ax.Layout.Column = [1 2];
 
-    if length(leftOut) > 0
-        coeff = fitline(X(:,leftOut))
+    if ~isempty(leftOut)
+        coeff = fitline(X(:,leftOut));
         m = coeff(1)/coeff(2) * (-1);
         q = coeff(3)/coeff(2) * (-1);
         plot(ax, X(1, leftOut), m * X(1, leftOut) + q, "-", "MarkerFaceColor", "r", "DisplayName", "Fitted NB");
@@ -55,8 +55,8 @@ function printBranches(tree, X, root)
         hold(ax, 'on');
     end
 
-    if length(clusterL) > 0
-        coeff = fitline(X(:,clusterL))
+    if ~isempty(clusterL)
+        coeff = fitline(X(:,clusterL));
         m = coeff(1)/coeff(2) * (-1);
         q = coeff(3)/coeff(2) * (-1);
         plot(ax, X(1, clusterL), m * X(1, clusterL) + q, "-", "MarkerFaceColor", "g", "DisplayName", "Fitted L: " + childL);
@@ -64,8 +64,8 @@ function printBranches(tree, X, root)
         plot(ax, X(1, clusterL), X(2, clusterL), "o", "MarkerFaceColor", "g", "DisplayName", "leftBranch");
         hold(ax, 'on');
     end
-    if length(clusterR) > 0
-        coeff = fitline(X(:,clusterR))
+    if ~isempty(clusterR)
+        coeff = fitline(X(:,clusterR));
         m = coeff(1)/coeff(2) * (-1);
         q = coeff(3)/coeff(2) * (-1);
         plot(ax, X(1, clusterR), m * X(1, clusterR) + q, "-", "MarkerFaceColor", "b", "DisplayName", "Fitted R: " + childR);
@@ -75,7 +75,7 @@ function printBranches(tree, X, root)
     end
 
 
-    coeff = fitline(X)
+    coeff = fitline(X);
     m = coeff(1)/coeff(2) * (-1);
     q = coeff(3)/coeff(2) * (-1);
     plot(ax, X(1, :), m * X(1, :) + q, "-", "MarkerFaceColor", "k", "DisplayName", "Fitted P: " + root);
@@ -94,7 +94,7 @@ function printBranches(tree, X, root)
     leftButton = uibutton(g, ...
         "Text",leftBranch, ...
         "ButtonPushedFcn", @(src,event) printBranches(tree, X, childL));
-    leftButton.Parent
+    leftButton.Parent;
     leftButton.Layout.Row = 1;
     leftButton.Layout.Column = 3;
 

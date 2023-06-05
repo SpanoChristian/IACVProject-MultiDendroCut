@@ -12,13 +12,10 @@ n = numel(rSqr);
 % Sum for number of rSqr element
 %dataFidelity = sum(min(rSqr./sigma^2, 2));
 
-dataFidelity = min(mean(rSqr./sigma, 'omitnan'), 1);
-%modelComplexity = 1/(exp(-(((n-lambda1)/(lambda2)))^(2)));
-%modelComplexity = 10/(exp(-(((n-lambda1)/(lambda2)))^(2))+(1/10));
-%modelComplexity = (n - lambda)^2;
-modelComplexity = weight*abs(k - nC);
+modelComplexity = (1/(k^(6-k)))*weight*abs(k - nC);
 
-dataFidelity = dataFidelity * (1/(n+1));
+dataFidelity = min(mean(rSqr./sigma, 'omitnan'), 1);
+dataFidelity = dataFidelity * 1/(log(n)^(1/k));
 %modelComplexity = (1/(n + 1)) * modelComplexity;
 
 
